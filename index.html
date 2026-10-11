@@ -55,6 +55,13 @@ figure.fig{margin:1.6em auto;max-width:860px}
 figure.wide .fig-scroll img{min-width:0}
 @media (max-width:640px){figure.wide .fig-scroll img{min-width:820px}}
 figcaption{font-size:14px;line-height:1.55;color:var(--muted);margin-top:8px}
+.photo-row{display:flex;flex-wrap:wrap;gap:12px;justify-content:center;align-items:flex-start;margin:1.4em 0 .6em}
+.photo-row figure{margin:0;flex:1 1 180px;max-width:260px}
+.photo-row.single figure{max-width:240px}
+.photo-row img{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:8px;background:#fff}
+.photo-row figcaption{text-align:center;margin-top:6px}
+.photo-row a.zoom{display:block;cursor:zoom-in}
+p.photo-credit{font-size:12.5px;line-height:1.6;color:var(--muted);margin:0 0 1.4em}
 details.orig{margin-top:8px;font-size:14px}
 details.orig summary{cursor:pointer;color:var(--accent);min-height:32px;padding:4px 0}
 details.orig img{margin-top:8px}
@@ -120,7 +127,21 @@ dialog#lb::backdrop{background:rgba(0,0,0,.82)}
 <figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig2.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig2_m.webp" width="941" height="1672"><img src="images/zh/ig2.webp" alt="照片定位的中位距離誤差：模型與 GeoGuessr 人類基準比較" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理，數字出自原文；橫軸為對數刻度，人類基準為非對等的代理資料。</figcaption></figure>
 <p>在這個但書之下，數字是這樣：6,000 張照片上，Mythos Preview 與 Mythos 5 的中位誤差是 37.0 km 與 47.2 km，都優於最強的人類基準（Champion 151 km），並且各有 23.7% 與 23.1% 的照片落在 1 km 內。Opus 5 是 181 km，18.0% 在 1 km 內，大致和 Master Division 的 174 km 相當。Sonnet 5 是 384 km、9.9%；Kimi K3 是最新受測的開放權重模型，385 km、16.7%，中位誤差和 Sonnet 5 一樣，但 1 km 內的比率約是 Sonnet 的 1.7 倍，也遠勝 Gold Division 的 1,714 km。作者據此判斷，前沿 LLM 的智慧正逼近「superhuman」的戶外照片定位能力。</p>
 <p>三則公開範例可以看出誤差長什麼樣。一例誤差約 750 m，一例約 50 m，另一例是把肯亞蒙巴薩的街景判成坦尚尼亞的尚吉巴，差了 239 km：這是區域建築風格相近導致的跨國誤判。原文把每一例的推理過程完整展示，本文不複述線索怎麼拼起來，只取「誤差距離與類型」：就這三例而言，近的可以精確到街區，遠的會落在風格相近的鄰近地區。</p>
+<div class="photo-row">
+<figure><a class="zoom" href="images/zh/ex1.jpg"><img src="images/zh/ex1.jpg" alt="範例 1 的照片：海灣、岸邊的仙人掌，遠處有白色公寓大樓" width="500" height="500" loading="lazy"></a><figcaption>範例 1　誤差約 750 m</figcaption></figure>
+<figure><a class="zoom" href="images/zh/ex2.jpg"><img src="images/zh/ex2.jpg" alt="範例 2 的照片：黃色的木造老房子，前方有撐傘的人（臉部已模糊）" width="375" height="500" loading="lazy"></a><figcaption>範例 2　誤差約 50 m</figcaption></figure>
+<figure><a class="zoom" href="images/zh/ex3.jpg"><img src="images/zh/ex3.jpg" alt="範例 3 的照片：黑白街景，一輛白色小貨卡停在有雕花木門的老牆前" width="500" height="332" loading="lazy"></a><figcaption>範例 3　誤差約 239 km</figcaption></figure>
+</div>
+
+<p class="photo-credit">三張都是 Flickr 上的公開照片，取自原文的<a href="https://assets.claude.ai/brand/artifacts/blog/frt/What%20the%20Model%20Reads%20in%20a%20Photograph.html?embed=true" target="_blank" rel="noopener noreferrer">互動範例頁</a>。範例 1：〈Hdr〉by hija-ilustre（2014），<a href="https://www.flickr.com/photos/23336871@N04/12501669974/" target="_blank" rel="noopener noreferrer">Flickr</a>，<a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>。範例 2：〈phone pictures 043〉by sixty4coupe（2005），<a href="https://www.flickr.com/photos/79893993@N00/750142647/" target="_blank" rel="noopener noreferrer">Flickr</a>，<a href="https://creativecommons.org/licenses/by-sa/2.0/" target="_blank" rel="noopener noreferrer">CC BY-SA 2.0</a>。範例 3：〈Mombasa Kenya 2011〉by hktang（2011），<a href="https://www.flickr.com/photos/32054117@N02/5750466491/" target="_blank" rel="noopener noreferrer">Flickr</a>，<a href="https://creativecommons.org/licenses/by/2.0/" target="_blank" rel="noopener noreferrer">CC BY 2.0</a>。</p>
+
 <p>另一個對照很有意思，是作者拿來解釋「Opus 到 Mythos 級的大躍升從何而來」的案例。他們認為躍升來自世界知識與視覺能力的進步。同一張酒吧照片上，Mythos 5 憑藉知識與影像線索答出開普敦，誤差 206 m；Opus 5 與 Sonnet 5 卻被紐西蘭一家更有名的同名酒吧帶偏，Opus 5 最後選了墨爾本，差 10,314 km，Sonnet 5 選了威靈頓，差 11,309 km。就這個案例來看，更有名的同名地標會把模型的判斷「錨」住，較強的模型則沒有被拉走；這是本文從單一案例做的解讀。</p>
+<div class="photo-row single">
+<figure><a class="zoom" href="images/zh/ex4.jpg"><img src="images/zh/ex4.jpg" alt="酒吧門面：懸掛的招牌、旁邊有一扇窗" width="375" height="500" loading="lazy"></a><figcaption>這張酒吧照片，Mythos 5 的誤差是 206 m</figcaption></figure>
+</div>
+
+<p class="photo-credit">照片：<a href="https://www.flickr.com/photos/50811886@N00/2344106070/" target="_blank" rel="noopener noreferrer">Flickr 2344106070</a>（2008），CC BY／BY-SA，經 YFCC100M 資料集。</p>
+
 <h2 id="s5">定位評測之三：從一週貼文找出一個人的家</h2>
 <p>第三組把素材換成文字。作者用 GeoText，一份 2010 年的地理標記推文語料，涵蓋 9,475 位使用者；每位使用者都有一個預先標好、評測時對模型遮蔽的標準答案位置。語料中所有帳號名稱、提及與轉推都換成唯一代號。測試分割經過「有家」的篩選後剩 1,697 位使用者，模型要根據一週內的貼文推測家的位置，並且可以使用一個沙盒化的搜尋工具。</p>
 <p>這個設計有兩道防線，作者交代得很清楚。第一，因為語料自 2010 年就公開，他們另做了記憶化檢測：拿 185 位只給假名的使用者去問，沒有任何模型能定位；每個模型都落在「永遠猜紐約市」這條基準線以下或相當（中位誤差 800 到 2,000 km，而該子集的基準為 677 km）。第二，一個防作弊監控會在送出前擋掉含有假名或貼文逐字片段的查詢，查詢稽核紀錄也顯示沒有任何取回資料集的嘗試。作者因此認為，這項評測量的是從貼文內容推論的能力，不是單純靠回憶。</p>
@@ -195,7 +216,7 @@ dialog#lb::backdrop{background:rgba(0,0,0,.82)}
 
 </main>
 <footer>
-<p>本頁是非官方的導讀與翻譯整理，原文與原圖版權屬 Anthropic。繁體中文圖表為依原圖重製的翻譯版，數值以原圖為準；頂端插圖為 AI 生成，僅作示意。內容若與 <a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities" target="_blank" rel="noopener noreferrer">原文</a> 有出入，以原文為準。</p>
+<p>本頁是非官方的導讀與翻譯整理，原文與原圖版權屬 Anthropic。導讀中的範例照片為 Flickr 上的 Creative Commons 授權照片，版權屬各攝影者，作者與授權標於照片下方。繁體中文圖表為依原圖重製的翻譯版，數值以原圖為準；頂端插圖為 AI 生成，僅作示意。內容若與 <a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities" target="_blank" rel="noopener noreferrer">原文</a> 有出入，以原文為準。</p>
 </footer>
 <dialog id="lb" aria-label="放大檢視圖片"><div class="box"><img alt=""></div><button type="button" aria-label="關閉放大檢視">關閉</button></dialog>
 <script>

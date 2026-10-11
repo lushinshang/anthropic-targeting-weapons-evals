@@ -71,7 +71,21 @@ GeoGuessr 是一款猜街景拍攝地點的遊戲，最頂尖的玩家（排名�
 
 三則公開範例可以看出誤差長什麼樣。一例誤差約 750 m，一例約 50 m，另一例是把肯亞蒙巴薩的街景判成坦尚尼亞的尚吉巴，差了 239 km：這是區域建築風格相近導致的跨國誤判。原文把每一例的推理過程完整展示，本文不複述線索怎麼拼起來，只取「誤差距離與類型」：就這三例而言，近的可以精確到街區，遠的會落在風格相近的鄰近地區。
 
+<div class="photo-row">
+<figure><a class="zoom" href="images/zh/ex1.jpg"><img src="images/zh/ex1.jpg" alt="範例 1 的照片：海灣、岸邊的仙人掌，遠處有白色公寓大樓" width="500" height="500" loading="lazy"></a><figcaption>範例 1　誤差約 750 m</figcaption></figure>
+<figure><a class="zoom" href="images/zh/ex2.jpg"><img src="images/zh/ex2.jpg" alt="範例 2 的照片：黃色的木造老房子，前方有撐傘的人（臉部已模糊）" width="375" height="500" loading="lazy"></a><figcaption>範例 2　誤差約 50 m</figcaption></figure>
+<figure><a class="zoom" href="images/zh/ex3.jpg"><img src="images/zh/ex3.jpg" alt="範例 3 的照片：黑白街景，一輛白色小貨卡停在有雕花木門的老牆前" width="500" height="332" loading="lazy"></a><figcaption>範例 3　誤差約 239 km</figcaption></figure>
+</div>
+
+<p class="photo-credit">三張都是 Flickr 上的公開照片，取自原文的<a href="https://assets.claude.ai/brand/artifacts/blog/frt/What%20the%20Model%20Reads%20in%20a%20Photograph.html?embed=true">互動範例頁</a>。範例 1：〈Hdr〉by hija-ilustre（2014），<a href="https://www.flickr.com/photos/23336871@N04/12501669974/">Flickr</a>，<a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>。範例 2：〈phone pictures 043〉by sixty4coupe（2005），<a href="https://www.flickr.com/photos/79893993@N00/750142647/">Flickr</a>，<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC BY-SA 2.0</a>。範例 3：〈Mombasa Kenya 2011〉by hktang（2011），<a href="https://www.flickr.com/photos/32054117@N02/5750466491/">Flickr</a>，<a href="https://creativecommons.org/licenses/by/2.0/">CC BY 2.0</a>。</p>
+
 另一個對照很有意思，是作者拿來解釋「Opus 到 Mythos 級的大躍升從何而來」的案例。他們認為躍升來自世界知識與視覺能力的進步。同一張酒吧照片上，Mythos 5 憑藉知識與影像線索答出開普敦，誤差 206 m；Opus 5 與 Sonnet 5 卻被紐西蘭一家更有名的同名酒吧帶偏，Opus 5 最後選了墨爾本，差 10,314 km，Sonnet 5 選了威靈頓，差 11,309 km。就這個案例來看，更有名的同名地標會把模型的判斷「錨」住，較強的模型則沒有被拉走；這是本文從單一案例做的解讀。
+
+<div class="photo-row single">
+<figure><a class="zoom" href="images/zh/ex4.jpg"><img src="images/zh/ex4.jpg" alt="酒吧門面：懸掛的招牌、旁邊有一扇窗" width="375" height="500" loading="lazy"></a><figcaption>這張酒吧照片，Mythos 5 的誤差是 206 m</figcaption></figure>
+</div>
+
+<p class="photo-credit">照片：<a href="https://www.flickr.com/photos/50811886@N00/2344106070/">Flickr 2344106070</a>（2008），CC BY／BY-SA，經 YFCC100M 資料集。</p>
 
 ## 定位評測之三：從一週貼文找出一個人的家
 
