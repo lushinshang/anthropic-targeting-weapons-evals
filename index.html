@@ -1,0 +1,199 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>保護你的不是祕密，是請不起分析師：Anthropic 紅隊量到的情報定位與傳統武器能力</title>
+<meta name="description" content="Anthropic Frontier Red Team 2026 年 9 月研究的臺灣繁體中文深度導讀：模型在情報定位與傳統武器軟體評測上量到什麼、作者承認哪些限制。">
+<link rel="canonical" href="https://lushinshang.github.io/anthropic-targeting-weapons-evals/">
+<link rel="icon" href="data:,">
+<meta property="og:type" content="article">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:site_name" content="Anthropic 紅隊評測導讀">
+<meta property="og:title" content="保護你的不是祕密，是請不起分析師：Anthropic 紅隊量到的情報定位與傳統武器能力">
+<meta property="og:description" content="Anthropic Frontier Red Team 2026 年 9 月研究的臺灣繁體中文深度導讀：模型在情報定位與傳統武器軟體評測上量到什麼、作者承認哪些限制。">
+<meta property="og:url" content="https://lushinshang.github.io/anthropic-targeting-weapons-evals/">
+<meta property="og:image" content="https://lushinshang.github.io/anthropic-targeting-weapons-evals/images/zh/hero.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="藍綠色的抽象等高線地形上橫放一把透明刻度尺，旁邊有長條圖與一枚定位圖釘，標題為「AI 能力評測」">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="保護你的不是祕密，是請不起分析師：Anthropic 紅隊量到的情報定位與傳統武器能力">
+<meta name="twitter:description" content="Anthropic Frontier Red Team 2026 年 9 月研究的臺灣繁體中文深度導讀：模型在情報定位與傳統武器軟體評測上量到什麼、作者承認哪些限制。">
+<meta name="twitter:image" content="https://lushinshang.github.io/anthropic-targeting-weapons-evals/images/zh/hero.png">
+<style>
+:root{color-scheme:light;--bg:#f9f7f4;--fg:#1a1a1a;--muted:#5b5f66;--line:#e2ddd5;--accent:#0b5b73;--card:#fffdfa}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font:17px/1.75 "Noto Sans TC","PingFang TC","Microsoft JhengHei",sans-serif;letter-spacing:0}
+a{color:var(--accent);text-underline-offset:3px}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid #f59e0b;outline-offset:3px;border-radius:4px}
+.skip{position:absolute;left:-999px}.skip:focus{left:12px;top:12px;background:#fff;padding:8px 12px;z-index:10}
+header.top{max-width:1120px;margin:0 auto;padding:20px 16px 0}
+.hero{margin:0 auto;max-width:760px}
+.hero img{display:block;width:100%;height:auto;border-radius:12px}
+.hero figcaption{font-size:13px;color:var(--muted);margin:6px 2px 0;text-align:right}
+main{max-width:760px;margin:0 auto;padding:8px 16px 56px}
+h1{font-size:clamp(1.7rem,4.4vw,2.6rem);line-height:1.3;margin:20px 0 10px;text-wrap:balance}
+.byline{color:var(--muted);font-size:14.5px;margin:0 0 20px;border-bottom:1px solid var(--line);padding-bottom:16px}
+h2{font-size:clamp(1.3rem,3vw,1.6rem);line-height:1.4;margin:2.4em 0 .6em;text-wrap:balance;scroll-margin-top:12px}
+p{margin:0 0 1.1em}
+blockquote{margin:1.2em 0;padding:.4em 1.1em;border-left:4px solid var(--accent);background:var(--card);color:#2a2f36}
+ul{padding-left:1.3em}li{margin:.3em 0}
+nav.toc{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 18px;margin:0 0 24px;font-size:15px}
+nav.toc summary{cursor:pointer;font-weight:600;padding:4px 0;min-height:32px}
+nav.toc ol{margin:6px 0 4px;padding-left:1.3em}
+figure.fig{margin:1.6em auto;max-width:860px}
+@media (min-width:900px){figure.fig{width:min(860px,calc(100vw - 48px));margin-left:50%;transform:translateX(-50%)}}
+.fig-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.fig img{display:block;width:100%;height:auto;background:#fff;border:1px solid var(--line);border-radius:8px}
+.fig a.zoom{display:block;cursor:zoom-in}
+figure.wide .fig-scroll img{min-width:0}
+@media (max-width:640px){figure.wide .fig-scroll img{min-width:820px}}
+figcaption{font-size:14px;line-height:1.55;color:var(--muted);margin-top:8px}
+details.orig{margin-top:8px;font-size:14px}
+details.orig summary{cursor:pointer;color:var(--accent);min-height:32px;padding:4px 0}
+details.orig img{margin-top:8px}
+p.video-link{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;font-size:15px;line-height:1.6}
+footer{max-width:760px;margin:0 auto;padding:20px 16px 48px;color:var(--muted);font-size:13.5px;border-top:1px solid var(--line)}
+dialog#lb{border:0;padding:0;background:transparent;max-width:100vw;max-height:100vh;width:100vw;height:100vh}
+dialog#lb::backdrop{background:rgba(0,0,0,.82)}
+#lb .box{width:100%;height:100%;display:flex;align-items:center;justify-content:center;overflow:auto;padding:48px 12px 12px}
+#lb img{max-width:none;width:min(1600px,200vw);height:auto;background:#fff;border-radius:4px}
+@media (min-width:900px){#lb img{max-width:96vw;width:auto;max-height:92vh}}
+#lb button{position:fixed;top:10px;right:10px;font:inherit;font-size:16px;min-width:44px;min-height:44px;border:0;border-radius:8px;background:#fff;color:#111;cursor:pointer}
+@media (prefers-reduced-motion:no-preference){html{scroll-behavior:smooth}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">跳到內文</a>
+<header class="top">
+<figure class="hero"><img src="images/zh/hero.png" alt="AI 生成插圖：藍綠色的抽象等高線地形上橫放一把透明刻度尺，旁邊有長條圖與一枚定位圖釘，標題為「AI 能力評測」" width="1200" height="630" fetchpriority="high"><figcaption>AI 生成插圖</figcaption></figure>
+</header>
+<main id="main">
+<h1>保護你的不是祕密，是請不起分析師：Anthropic 紅隊量到的情報定位與傳統武器能力</h1>
+<p class="byline">導讀　2026-10-11　｜　原文：<a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities" target="_blank" rel="noopener noreferrer">Anthropic Frontier Red Team，2026-09-10</a></p>
+<nav class="toc" aria-label="章節目錄"><details><summary>章節目錄</summary><ol><li><a href="#s1">為什麼是「定位」與「武器」，不是資安與生物</a></li><li><a href="#s2">先講結論，再講它的框架</a></li><li><a href="#s3">定位評測之一：從假帳號堆裡認出同一個人</a></li><li><a href="#s4">定位評測之二：一張沒有座標的照片，能被猜到多近</a></li><li><a href="#s5">定位評測之三：從一週貼文找出一個人的家</a></li><li><a href="#s6">從「找人」換到「做武器」：評測的共同框架</a></li><li><a href="#s7">引導命中：結果是一道會變平的階梯</a></li><li><a href="#s8">投放與無 GPS 飛行：兩個「加了風與干擾就崩」的故事</a></li><li><a href="#s9">作者的結論，與本文的幾點判讀</a></li><li><a href="#s10">來源</a></li></ol></details></nav>
+<p>GeoGuessr 是一款猜街景拍攝地點的遊戲，最頂尖的玩家（排名前 0.01%）在對戰裡的中位誤差是 151 km。Anthropic 的 Frontier Red Team 拿一批社群網站上的普通照片去問模型，Mythos Preview 的中位誤差是 37.0 km，Mythos 5 是 47.2 km。兩邊的測試條件並不對等，後面會講；但就算打折，這個落差也夠讓人重新想一件事：過去要靠稀有專家花時間才能做的情報工作，現在有多少已經不再稀有。</p>
+<p>這篇文章是 Frontier Red Team 在 2026 年 9 月 10 日發表的〈Measuring tactical intelligence targeting and conventional weapons capabilities of AI models〉。他們做了兩組評測：一組量模型當「情報定位員」的能力，一組量模型替小型無人機寫飛控軟體的能力。以下依序談作者量了什麼、結果如何、哪些是作者自己承認的限制，以及本文自己的判讀。判讀的部分會明說，不會混進作者的結論裡。</p>
+<h2 id="s1">為什麼是「定位」與「武器」，不是資安與生物</h2>
+<p>資安與生物風險是 AI 濫用研究裡最常被檢視的兩塊。作者的出發點是：現代衝突大部分發生在比較傳統的領域，對手想辦法找出彼此來蒐集情報，戰鬥人員想讓傳統武器更準、更不怕反制。原文引用的 kill chain（find、fix、track、target、engage、assess）是描述這類交戰的概念模型，而每一步過去都要靠專家的人力與判斷。</p>
+<p>作者的問題很直接：AI 在資料分析與軟體開發上進步這麼快，能不能把這些本事用到國安的專門領域？同時發布的 Threat Intelligence 報告給了他們一個答案：裡面記錄了 AI 被用在監控與傳統武器開發的案例，顯示威脅行為者已經從中感受到好處。Frontier Red Team 的評測是它的補充，用來說明 AI 進展「如何」改變 kill chain 各段的風險。</p>
+<p>這篇導讀不重述武器相關評測的任務設定與技術做法，只談評測量什麼、結果數字、作者自述的限制，以及對治理的意義。定位類也只談評測設計與結果。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig1.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig1_m.webp" width="941" height="1672"><img src="images/zh/ig1.webp" alt="評估全景：左側三項定位評測、右側三項武器軟體評測，底部為受測模型" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理的評估全景（文字定位另含 GLM 5.2）。</figcaption></figure>
+<h2 id="s2">先講結論，再講它的框架</h2>
+<p>作者在摘要裡給的三個說法是：某些任務上，模型能做到過去只有稀少且訓練有素的專家才做得到的事；這些評測說明了為什麼平台端的安全措施有其必要，例如他們新實作、用來擋這類濫用的 classifier；來自中國的開放權重模型雖然落後前沿，仍展現令人擔憂的能力。他們的整體說法是，開放權重模型在同一批評測上落後前沿，表現通常介於 Sonnet 與 Mythos 級模型之間，但常常已經到了讓人擔心的程度，而且「Models well short of the frontier will have intelligence and military applications」。</p>
+<p>這裡有一個容易讀過去的前提，是整篇的核心邏輯，值得先停下來：</p>
+<blockquote>
+<p>「much of what protects people, programs, and facilities from intelligence targeting is not secrecy so much as cost.」</p>
+</blockquote>
+<p>意思是，讓人不被鎖定的主要原因，不是資料藏得好。可用來去匿名化的資料，很多本來就公開在網路上、能便宜買到，或已經在敵對情報機構手上。真正擋住大多數人的是「分析師工時很貴」。如果模型把這份工時變得便宜、到處都有，兩件事會同時發生：過去做不到這套流程的個人與小團體變得做得到；資源充足的行動者也能把原本沒力氣處理的資料庫榨出價值。作者的結論是，兩種變化都可能讓更多人暴露在新的審視之下。註腳補了一句：這類專業知識隨著 Bellingcat 之類的線上開源情報調查者興起而略有擴散，但他們仍傾向聚焦在高知名度的目標與案件。</p>
+<p>這是本文最想請讀者帶走的概念：成本本來就是一種保護，而成本結構正在被改寫。這一點是作者自己明寫的，不是本文的延伸。</p>
+<h2 id="s3">定位評測之一：從假帳號堆裡認出同一個人</h2>
+<p>第一組評測做兩件事：判斷不同平台上的帳號是不是同一個人（身分關聯），以及把這些人分進感興趣的類別（身分分類）。作者的資料是模型生成的模擬社群內容，模擬 WhatsApp、Telegram、Instagram、Facebook 的使用者活動。整套產生 200 個任務，分布在兩個虛構情境（墨西哥市與加爾各答的抗議運動語料），依帳號數量與關聯證據稀疏程度分成三個難度：68 個簡單、68 個中等、64 個困難。指標是 F1。</p>
+<p>先看作者自己標出的條件，這些條件決定了這組結果能怎麼讀：</p>
+<ul>
+<li>每個模型的樣本數是 18 / 16 / 16（簡單 / 中等 / 困難），合併為 50。就統計來說這個規模不大，這是本文的判讀。</li>
+<li>理論上限小於 1：有些帳號從不發文，再強的解題者也連不上。分類任務的上限同樣由設計決定，依難度只有約 76% / 60% / 52% 的成員會留下足以被找到的痕跡。</li>
+<li>資料是合成的，作者坦承仍有「redundant, artificial phrasing and a lack of naturalism」，因此結果只能看作模型之間能力差異的提示，不是現實環境的絕對成績。</li>
+<li>註腳說明他們試了兩種提示變體，一種點名特定人物，一種只描述關注的議題，報告的是後者，兩者的模型排序「essentially the same」。</li>
+</ul>
+<p>身分關聯上，Mythos Preview 最好，實際表現與理論上限的差距在三個難度都最小。Kimi K3 在簡單與中等樣本上和前沿差不多，一旦樣本雜訊更多、人物的作業安全做得更好，就落後了。分類任務的結果相近但分數更擠：Mythos Preview 最好、Sonnet 最差，K3 則和 Mythos 5、Opus 5 同在中段。</p>
+<p>比分數更有感的是速度。中位樣本約有 37,000 個英文單字，作者估計人類分析師光讀完就要約 2.5 小時，系統性分析更久；Claude Mythos Preview 平均約 11 分鐘就交出完整評估。</p>
+<h2 id="s4">定位評測之二：一張沒有座標的照片，能被猜到多近</h2>
+<p>第二組評測問的是「fix」，也就是把目標釘在某個地點。作者請模型只靠自己對世界的理解，替社群照片找出拍攝地，不能用以圖搜圖、不能讀 metadata、也不能用工具。照片來自 YFCC100M 的寬鬆授權、地理標記緊密的子集，濾掉無法定位的圖（向量圖、微距等），並依洲分層；標記作為標準答案，評測時對模型遮蔽。作者另用模型知識截止日期之後的保留影像做了額外實驗，結果分布相似。</p>
+<p>這一節最需要小心的是人類基準。作者坦白說，在這個資料集上沒有人類基準，只能用 Haas 等人 2024 年的 GeoGuessr 競技資料（458 場多回合對戰）當代理。該任務結構相似，但用的是街景，玩家還能在場景裡轉動、移動，每題掌握的資訊比模型看到的靜態單張更多；YFCC 的照片也不限於街道，場景雜得多。註腳還補了時間條件：對手答完之後，玩家只剩 15 秒，人類的中位數大約對應 15 到 20 秒的互動式街景探索，相較之下 Mythos 5 看單張靜態圖，中位用了 6 秒。簡單說，這是一個<strong>非對等</strong>的比較，而且原文只在這一項提供人類基準。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig2.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig2_m.webp" width="941" height="1672"><img src="images/zh/ig2.webp" alt="照片定位的中位距離誤差：模型與 GeoGuessr 人類基準比較" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理，數字出自原文；橫軸為對數刻度，人類基準為非對等的代理資料。</figcaption></figure>
+<p>在這個但書之下，數字是這樣：6,000 張照片上，Mythos Preview 與 Mythos 5 的中位誤差是 37.0 km 與 47.2 km，都優於最強的人類基準（Champion 151 km），並且各有 23.7% 與 23.1% 的照片落在 1 km 內。Opus 5 是 181 km，18.0% 在 1 km 內，大致和 Master Division 的 174 km 相當。Sonnet 5 是 384 km、9.9%；Kimi K3 是最新受測的開放權重模型，385 km、16.7%，中位誤差和 Sonnet 5 一樣，但 1 km 內的比率約是 Sonnet 的 1.7 倍，也遠勝 Gold Division 的 1,714 km。作者據此判斷，前沿 LLM 的智慧正逼近「superhuman」的戶外照片定位能力。</p>
+<p>三則公開範例可以看出誤差長什麼樣。一例誤差約 750 m，一例約 50 m，另一例是把肯亞蒙巴薩的街景判成坦尚尼亞的尚吉巴，差了 239 km：這是區域建築風格相近導致的跨國誤判。原文把每一例的推理過程完整展示，本文不複述線索怎麼拼起來，只取「誤差距離與類型」：就這三例而言，近的可以精確到街區，遠的會落在風格相近的鄰近地區。</p>
+<p>另一個對照很有意思，是作者拿來解釋「Opus 到 Mythos 級的大躍升從何而來」的案例。他們認為躍升來自世界知識與視覺能力的進步。同一張酒吧照片上，Mythos 5 憑藉知識與影像線索答出開普敦，誤差 206 m；Opus 5 與 Sonnet 5 卻被紐西蘭一家更有名的同名酒吧帶偏，Opus 5 最後選了墨爾本，差 10,314 km，Sonnet 5 選了威靈頓，差 11,309 km。就這個案例來看，更有名的同名地標會把模型的判斷「錨」住，較強的模型則沒有被拉走；這是本文從單一案例做的解讀。</p>
+<h2 id="s5">定位評測之三：從一週貼文找出一個人的家</h2>
+<p>第三組把素材換成文字。作者用 GeoText，一份 2010 年的地理標記推文語料，涵蓋 9,475 位使用者；每位使用者都有一個預先標好、評測時對模型遮蔽的標準答案位置。語料中所有帳號名稱、提及與轉推都換成唯一代號。測試分割經過「有家」的篩選後剩 1,697 位使用者，模型要根據一週內的貼文推測家的位置，並且可以使用一個沙盒化的搜尋工具。</p>
+<p>這個設計有兩道防線，作者交代得很清楚。第一，因為語料自 2010 年就公開，他們另做了記憶化檢測：拿 185 位只給假名的使用者去問，沒有任何模型能定位；每個模型都落在「永遠猜紐約市」這條基準線以下或相當（中位誤差 800 到 2,000 km，而該子集的基準為 677 km）。第二，一個防作弊監控會在送出前擋掉含有假名或貼文逐字片段的查詢，查詢稽核紀錄也顯示沒有任何取回資料集的嘗試。作者因此認為，這項評測量的是從貼文內容推論的能力，不是單純靠回憶。</p>
+<p>結果是：搜尋輔助下，中位家位置誤差 Mythos Preview 為 20.1 km，Mythos 5 為 20.9 km，Opus 5 為 21.7 km，Sonnet 5 為 31.3 km；Kimi K3 為 26.4 km，GLM 5.2 為 31.0 km，永遠猜紐約的基準是 727 km。有趣的是搜尋行為不同：Kimi K3 只對 57% 的使用者選擇搜尋，Claude 模型超過 99%，GLM 5.2 是 87%。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig3.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig3_m.webp" width="941" height="1672"><img src="images/zh/ig3.webp" alt="文字定位的中位家位置誤差，與「保護從哪裡來」的天平概念圖" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理，數字出自原文；長條長度為示意，以標示的數值為準。</figcaption></figure>
+<p>作者對這個結果下了一個重要的判斷：各模型的分數擠得這麼近，表示做這件事所需的核心能力現在已經普遍存在，不是只有前沿模型才做得到。</p>
+<p>怎麼看這些數字，作者自己加了兩個但書。第一，他們為了保護隱私，在評測架構上放了限制，可能人為壓低了模型表現的天花板；作者推測，若開放不受限的網路搜尋、取消禁止去匿名化的限制、允許多輪累積檔案，準確度會更高，也可能拉開前沿與非前沿模型的差距。但作者也說，要不要、怎麼進一步驗證這個假設，他們想保持謹慎。第二，這組評測模擬的是在大型都會區辨識人、供後續監控與蒐集之用的場景，並未直接模擬在人口稀少的戰場上近即時地精準定位，那留給後續研究。</p>
+<p>這個「天花板」的說法，本文要和另一句話分開看。作者在武器評測那一節說結果更該讀成「floor rather than a ceiling」，兩句語意相容，都是在說量到的值低於實際能力，但在原文裡是兩個不同位置的論點。</p>
+<p>還有兩件事值得記下來。一是 135 位使用者（語料的 8%）曾被至少一個模型穩定定位到其評估的家 1 km 內。其中 95 位（70%）因為直接提到宿舍、場館名稱或明確地點而洩漏；另 17 位（13%）是靠說話方式與地方性內容；其餘 23 位（17%）作者評估多半是運氣，模型只能收斂到都會區，丟出一個市中心座標，剛好離使用者住處很近。另一件是行為上的觀察：作者翻閱逐字稿時發現，模型常常主動嘗試去匿名化使用者。有一例真實貼文，Mythos 5 與 Mythos Preview 都找到了正確的都會區，但最後落在使用者評估住處 87 到 95 km 之外。原文用一個三回合的互動頁（提出假設與搜尋、追查線索、給出估計）呈現這個真實案例，內容已經去識別化，並說明貼文是改寫而非原文引述。</p>
+<p>另外作者還做了一個合成人物的示範（Ladder of Clues），設計上是把線索分成三個階段，從有具體場所名稱，到只有明確地點，再到完全沒有地點內容。每一階段都請 Mythos 5（不使用工具）重新回答家在哪、以及 50% 信心半徑，每階段取三個樣本、畫出中位數。作者特別註明這是一位虛構人物，是示意而不是比率。</p>
+<h2 id="s6">從「找人」換到「做武器」：評測的共同框架</h2>
+<p>武器子系統這邊，作者的立場是：大型語言模型當然還不能下場去磨機身，但它們會寫軟體。他們因此設計了一組評測，量模型在模擬環境中撰寫並改進導引、導航與控制（GNC）軟體的能力，涵蓋三件事：引導命中、投放、在被干擾與欺騙的環境中導航。作者認為，這類程式的專業同樣長期稀缺且昂貴；等模型拿掉這個瓶頸，會有更多團體能開發量身訂製的精準武器，不過材料與製造設備的取得，現階段仍是重要的制約。</p>
+<p>先把最大的限制擺在前面，這是作者自己放在這一節開頭的：這些評測<strong>只在模擬裡進行</strong>，「nothing substitutes for testing in hardware」。作者為什麼還是認為值得做，給了兩個理由。一是 Threat Intelligence 團隊已經發現真實的行為者成功把模型用在這類工作，所以他們不是靠模擬來證明威脅存在，而是用它來顯示模型能力的軌跡。二是這些評測能區分模型：較弱的模型失敗、較強的模型通過，而且最難的幾種設定，所有受測模型都還沒解開。</p>
+<p>共同的流程大致是：模型拿到一份書面任務說明與一個工作環境，撰寫程式、跑測試、拿到類似人類工程師會收集到的回饋，再修改後重飛。每次試驗有固定的飛行次數預算（每個 trial 12 次，投放評測為 15 次，每種設定 5 到 10 個隨機種子）；每次飛行都有隨機化，防止模型背答案，但各模型飛的是同一組隨機情境，便於比較。所有模型都用高推理設定執行。</p>
+<figure class="fig wide"><div class="fig-scroll"><a class="zoom" href="images/zh/fig1_zh.webp"><picture><img src="images/zh/fig1_zh.webp" alt="三項無人機飛控評測總覽：引導命中率與 5 m 內投放率（越高越好）、無 GPS 最終距離中位數（越低越好）；Opus 5 三項最佳，其次為 Mythos 系列，Sonnet 5 與 Kimi K3 落後" width="1925" height="817" loading="lazy"></picture></a></div><figcaption>圖 1：三項飛控軟體評測總覽。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/b6e052bfe65f0aed4561cc24de09aef0692d7ab7-2823x1198.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/b6e052bfe65f0aed4561cc24de09aef0692d7ab7-2823x1198.png" alt="英文原圖（Anthropic）：三項無人機飛控評測總覽" loading="lazy"></a></details></figure>
+<h2 id="s7">引導命中：結果是一道會變平的階梯</h2>
+<p>這一項模擬的是無人機在最後一段飛向一個可能移動的車輛目標。作者提到，在目前烏克蘭的 FPV 無人機上，終端導引是自動化的關鍵應用，所以他們選了這個切面來模擬。模型以擊中率計分，要早早寫出可行解、並在十二次隨機化發射裡穩定奏效，才拿得到分。</p>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/8bc850d7362745512a889039dbfd834e51daf865.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 1：低多邊形的模擬場景，俯視鏡頭從遠處逼近道路上的一輛車，結尾畫面被車體填滿</a></p>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/11716f7161dca7ac490e7e18ed8797772136e319.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 2：Opus 5 在最簡單的設定下成功，目標是停放的高對比車輛，畫面為無人機接近一輛紅白車並對準</a></p>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/943a20a1e9d79ffc3db1433979fa421df55b8d89.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 3：Kimi K3 在同一個最簡單設定下的模擬機載畫面，左上標示模型名稱，最後沒有命中，作者的說明是差 1.86 m 後落地</a></p>
+<figure class="fig wide"><div class="fig-scroll"><a class="zoom" href="images/zh/fig2_zh.webp"><picture><img src="images/zh/fig2_zh.webp" alt="各設定的無人機擊中率：Opus 5 在停放高可見度汽車上達 80%，最難設定全為 0%" width="2064" height="762" loading="lazy"></picture></a></div><figcaption>圖 2：各難度設定的擊中率。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/a34c78c700580f2d53f8726dbdd615f7890dfbe2-2951x1088.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/a34c78c700580f2d53f8726dbdd615f7890dfbe2-2951x1088.png" alt="英文原圖（Anthropic）：各設定的無人機擊中率" loading="lazy"></a></details></figure>
+<p>數字排出來，是一道越往下越平的階梯。面對停放且顏色對比明顯的車輛，Opus 5 的擊中率是 80%，Mythos Preview 70%，Mythos 5 53%，Kimi K3 15%，Sonnet 5 5%。車輛改以路速行駛後，Opus 降到 47%，Mythos Preview 20%，Mythos 5 17%，K3 1.6%，Sonnet 0%。多數模型的表現不受路邊雜物與速度變化影響，但 Opus 從 47% 降到 30%。低對比顏色是「everything breaks」的地方，在這個設定下只有 Opus 還有命中（8%）。偽裝、迴避或被誘餌包圍的設定，沒有任何受測模型能穩定解決。九種設定合計，Opus 5 在 540 次發射中擊中 20%，Mythos Preview 13%，Mythos 5 10%，Kimi K3 1.6%，Sonnet 5 0.7%。</p>
+<p>有一點反直覺：最新的 Mythos 系列沒有贏過 Opus 5。作者分析了原因，列出三個工程行為上的差異；這屬於工程做法層面，本文不展開。</p>
+<p>作者列出的限制有三。相機與渲染遠比現實簡單，這在某些方面讓評測更容易（感知程式不需像現實那麼穩健），但在另一些方面反而更難（模擬裡較容易做出偽裝與低對比）。真實的無人機可能有多鏡頭、更高解析度，甚至紅外線相機。作者還刻意只給初始目標標示、要求模型自己維持鎖定，而有些實戰系統用專用模組負責計算並維持追蹤。</p>
+<h2 id="s8">投放與無 GPS 飛行：兩個「加了風與干擾就崩」的故事</h2>
+<p><strong>投放</strong>評測量模型寫程式、對目標釋放模擬的投放物。作者用兩個指標：中位落點誤差落在 5 m 內的飛行比例，以及中位誤差本身。靜態靶基本上已經飽和：Opus 5 與 Mythos 5 幾乎全中，中位誤差二十到三十公分；Sonnet 5 與 Mythos Preview 都是 92% 的飛行落在 5 m 內，中位誤差分別為 0.5 m 與 0.2 m；Kimi K3 是 83%，中位 0.4 m。目標開始移動後，模型才拉開差距：約三公尺每秒的移動目標上，Sonnet 5 多數失敗，K3 有 53%，中位約 1.8 m；Opus 5 是 76%，約一公尺；Mythos Preview 77%、Mythos 5 69%，中位約一點五公尺與兩公尺。偽裝車在障礙物間曲折時，Mythos Preview 為 53%，Opus 44%，Mythos 5 30%，Sonnet 與 K3 幾乎為零。</p>
+<p>最難的設定下幾乎所有模型崩潰：K3 和 Sonnet 5 幾乎沒有成功的投放，Mythos 5 與 Mythos Preview 分別只有 7% 與 4%。只有 Opus 5 還有成績，28% 的飛行成功，在它釋放的投放物上中位誤差 3.9 m，剛好卡在 5 m 內。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/fig3_zh.webp"><picture><img src="images/zh/fig3_zh.webp" alt="投放評測各設定結果：上圖為 5 m 內落點比例（越高越好），下圖為失誤距離中位數（對數刻度，越低越好）；多數模型對靜止目標可落在 5 m 內，最難的有風蛇行目標只有 Opus 5 還有 28%，其餘不到 8%" width="1421" height="1107" loading="lazy"></picture></a></div><figcaption>圖 3：投放評測。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/f0250a95621ed26b19c68b170ae30b8df7208f07-2405x1875.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/f0250a95621ed26b19c68b170ae30b8df7208f07-2405x1875.png" alt="英文原圖（Anthropic）：投放評測各設定結果" loading="lazy"></a></details></figure>
+<p><strong>無 GPS 飛行</strong>則模擬導航被電子干擾與欺騙的情境。作者的背景說明是，俄烏衝突中 GPS 經常被干擾與欺騙，GPS 導引的彈藥與依賴衛星導航的無人機因此無法仰賴準確訊號。模型先有十二次開發飛行，再用五次未見過的保留飛行來評測；指標是宣告抵達點與目的地的中位距離，以及五次中有幾次落在 5 m 內。難度分五級，從乾淨 GPS 到長航程的強力欺騙；欺騙的時機與方式不會告訴模型。</p>
+<p>乾淨 GPS 的設定下，除了 Sonnet 5 之外所有模型都能飛完全程，通常停在距目的地一兩公尺內；Sonnet 5 在有風時就算 GPS 正常也無法穩定完成。Kimi K3 在沒有欺騙或干擾時飛得很稱職，但一旦受到攻擊就容易被騙，四個受攻擊設定的終點都離目的地超過一百公尺；它在最簡單以外的設定，表現和 Sonnet 5 差不多。當 GPS 在最後進場階段被拒止時，Opus 5 通常停在十五到二十公尺外，約三分之一的飛行落在 5 m 內；Mythos 5 與 Mythos Preview 稍低於三十公尺；Sonnet 5 與 Kimi K3 則停在一百公尺以上。遇到細微的欺騙（緩慢漂移）時，所有模型都表現很差，最難設定沒有任何模型成功。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/fig4_zh.webp"><picture><img src="images/zh/fig4_zh.webp" alt="無 GPS 飛行結果：上圖為最終距離中位數（對數刻度，越低越好），下圖為 5 m 內抵達比例（越高越好）；GPS 乾淨時多數模型抵達，被拒止或欺騙後只有 Opus 5 在進場拒止設定下有 30%，其餘幾乎為 0" width="1423" height="1105" loading="lazy"></picture></a></div><figcaption>圖 4：無 GPS 飛行評測。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/c6122be642a10bb9c30f992dc6290dca1e94a015-2416x1877.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/c6122be642a10bb9c30f992dc6290dca1e94a015-2416x1877.png" alt="英文原圖（Anthropic）：無 GPS 飛行結果" loading="lazy"></a></details></figure>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/096212d70b306f6444768a4a8e89a45b246b706a.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 4：「Flying without GPS: persistent drift on the final approach」軌跡動畫（6 倍速），在同一條航線、風與 GPS 攻擊下重飛 Kimi K3、Mythos 5、Opus 5，依序經過 GPS 正常、被拒止、被欺騙；結尾畫面顯示 Kimi K3 出界（誤差 229 m）、Mythos 5 終點誤差 19.4 m，並標出終點 5 m 範圍圈</a></p>
+<p>三項評測合起來，作者的總結是：Opus 5、Mythos 5 與 Mythos Preview 對每一項模擬任務都寫得出可運作的 GNC 軟體，並在簡單到中等的設定下把它迭代到可靠；Sonnet 5 只能完成每項任務最簡單的版本；開放權重的 Kimi K3 在投放上高於 Sonnet，在導引命中與干擾下的導航則回到 Sonnet 的水準。</p>
+<p>作者也強調了怎麼解讀這些結果。模型是單獨在沙盒裡工作，只有書面任務說明、物理模擬器與固定的飛行預算；沒有網路、沒有可直接整合的完整解法庫、也沒有人類仔細讀遙測資料。這遠少於一個有動機的人實際會有的資源，弱模型卡住的原因，很多是人類夥伴多做點網路研究與實測就能補救的錯誤。作者因此認為這些結果比較像「地板」而不是「天花板」；他們也說開放權重生態系離得夠近，這個差距不該被誤認為安全，「that gap will eventually close」。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig4.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig4_m.webp" width="941" height="1672"><img src="images/zh/ig4.webp" alt="作者自述的限制：定位類與武器軟體類各五項" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理自原文各節的限制說明。</figcaption></figure>
+<h2 id="s9">作者的結論，與本文的幾點判讀</h2>
+<p>結論段作者先收斂了限制：許多評測依賴模擬資料，也沒有直接量測 uplift（模型讓人多做到了什麼）。這些結果指向的是低資源團體取得新的專業能力，以及國家級行為者的能力被放大，這些行為者原本受限於能雇用的分析師或工程師人數；而許多情況下，這些行為者仍會被材料限制卡住，AI 是否、如何幫忙跨過這些限制，是後續研究的要務。即便如此，作者說證據是清楚的：現有的閉源與開放權重模型，都能協助威脅行為者辨識與定位人，並設計武器子系統的軟體。</p>
+<p>治理上，作者提出幾個方向：閉源模型開發者需要部署安全措施，例如他們的 Safeguards 團隊在發現濫用後實作的新 classifier，用來偵測並擋掉與武器開發有關的請求，同時承認底層工程能力具雙重用途，classifier 不可能完美，但先實作再迭代比放任好；開放權重模型的安全研究更加迫切；決策者應考慮如何提高社會對這種「專業能力民主化」的韌性，並讓執法、監管與國安單位有能力因應。往後看，作者提到無人機之外，太空與水下作戰同樣需要更好的感測與應變演算法，若模型成為更有創意的研究者，可能成為地緣政治破壞的來源；列舉這些可能並發展預警測試，是他們接下來的重要工作。</p>
+<p>以下是本文自己的判讀，不是作者的結論，讀者可自行取捨。</p>
+<p><strong>第一，「成本即保護」比任何單一數字更值得記。</strong> 在文字定位那一節，真正洩漏位置的是直白的線索（宿舍、場館、街名），佔了被穩定定位者的 70%。對個人來說，這更像生活習慣的問題，不是技術問題：公開貼文裡的具體地點詞，是最便宜的線索。不過這個推論只建立在作者的一組 2010 年公開語料上，現實裡的分布可能不同。</p>
+<p><strong>第二，照片定位的「超人」結論要帶著三個折扣讀。</strong> 人類基準是代理資料，街景比靜態圖資訊多，人類又有時間壓力。折扣有正有負，淨效果作者沒有量化。我的讀法是：方向可信（模型確實很強），但把 37.0 km 對 151 km 當成精確的勝負，就超出資料能支持的範圍了。</p>
+<p><strong>第三，模型之間的差距在不同任務上並不同步。</strong> 文字定位的中位誤差擠在 20.1 到 31.3 km，作者的解讀是核心能力已普遍；軟體評測的差距卻很大（擊中率從 20% 到 0.7%）。所以「開放權重落後前沿多少」沒有單一答案，要看是哪種任務。這是本文的歸納，不是原文的論點。</p>
+<p><strong>第四，模擬永遠是下限的證據，不是上限的證據。</strong> 作者自己的邏輯是，威脅已由 Threat Intelligence 的真實案例證明，模擬只用來量測軌跡。照這個邏輯，最難設定「全部模型都沒解開」不能被讀成安心的訊號，只能讀成「目前還沒」。</p>
+<p><strong>第五，值得追問的缺口。</strong> 原文沒有量 uplift，也沒有量人類加模型的組合；材料與製造這類現實制約如何被 AI 改變，作者列為未來工作。這些是現在無法回答的問題，不是已有的結論。</p>
+<p>如果成本真的是大多數人的保護傘，那傘下的人需要先知道傘在變薄。這篇研究做的就是這件事，至於怎麼補，作者自己也說，答案還沒有。</p>
+<h2 id="s10">來源</h2>
+<ul>
+<li><a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities" target="_blank" rel="noopener noreferrer">Measuring tactical intelligence targeting and conventional weapons capabilities of AI models</a>：本文導讀的原文，Anthropic Frontier Red Team，2026-09-10。</li>
+<li><a href="https://www.anthropic.com/threat-intelligence-report-september-2026" target="_blank" rel="noopener noreferrer">Threat Intelligence 報告（2026 年 9 月）</a>：原文所稱的配套報告，記錄威脅行為者把 AI 用於監控與傳統武器開發的案例。</li>
+<li><a href="https://www.anthropic.com/research/zero-days" target="_blank" rel="noopener noreferrer">Anthropic 論零時差漏洞的研究</a>：原文用來說明資安是研究最充分的 AI 濫用風險領域之一。</li>
+<li><a href="https://www.anthropic.com/research/exploit-evals" target="_blank" rel="noopener noreferrer">Anthropic 論 exploit 評測的研究</a>：同上，原文的另一個資安領域引用。</li>
+<li><a href="https://www.esd.whs.mil/Portals/54/Documents/FOID/Reading%20Room/Joint_Staff/21-F-0520_JP_3-60_9-28-2018.pdf#page=25" target="_blank" rel="noopener noreferrer">Joint Staff JP 3-60（2018-09-28）</a>：原文引用的 kill chain 概念模型出處。</li>
+<li><a href="https://www.anthropic.com/research/team/frontier-red-team" target="_blank" rel="noopener noreferrer">Frontier Red Team 團隊頁面</a>：原文連結的團隊介紹。</li>
+<li><a href="https://registry.opendata.aws/multimedia-commons/" target="_blank" rel="noopener noreferrer">YFCC100M（Multimedia Commons）</a>：照片定位評測所用的 Flickr 資料集來源。</li>
+<li><a href="https://arxiv.org/abs/2307.05845" target="_blank" rel="noopener noreferrer">Haas et al. 2024</a>：GeoGuessr 競技玩家的人類基準資料。</li>
+<li><a href="https://www.cs.cmu.edu/~ark/GeoText/" target="_blank" rel="noopener noreferrer">GeoText 語料</a>：文字定位評測使用的 2010 年地理標記推文語料。</li>
+<li><a href="https://www.csis.org/analysis/ukraines-future-vision-and-current-capabilities-waging-ai-enabled-autonomous-warfare" target="_blank" rel="noopener noreferrer">CSIS：烏克蘭 AI 自主作戰的願景與現況</a>：原文引用的烏克蘭現況背景。</li>
+<li><a href="https://en.defence-ua.com/weapon_and_tech/how_ukrainian_fpv_drones_with_automated_terminal_guidance_work-14687.html" target="_blank" rel="noopener noreferrer">Defence UA：烏克蘭 FPV 無人機的自動化終端導引</a>：同上，原文的另一個背景來源。</li>
+<li><a href="https://www.sto.nato.int/document/technologies-for-future-precision-strike-missile-systems-2/" target="_blank" rel="noopener noreferrer">NATO STO：未來精準打擊飛彈系統技術</a>：原文用來說明部分實戰系統有專用目標追蹤模組。</li>
+<li><a href="https://www.armyupress.army.mil/Journals/Military-Review/English-Edition-Archives/July-August-2023/Grenade-Dropping-Quadcopters/" target="_blank" rel="noopener noreferrer">Military Review：投擲手榴彈的四旋翼</a>：原文用來說明消費級無人機被改作投放用途。</li>
+<li><a href="https://ctc.westpoint.edu/moving-targets-implications-of-the-russo-ukrainian-war-for-drone-terrorism/" target="_blank" rel="noopener noreferrer">CTC Sentinel：俄烏戰爭對無人機恐怖主義的啟示</a>：同上，原文的另一個背景來源。</li>
+<li><a href="https://www.rusi.org/explore-our-research/publications/commentary/jamming-jdam-threat-us-munitions-russian-electronic-warfare" target="_blank" rel="noopener noreferrer">RUSI：干擾 JDAM 對美國彈藥的威脅</a>：原文說明 GPS 在俄烏衝突中被干擾與欺騙的來源之一。</li>
+<li><a href="https://www.defenseone.com/threats/2024/04/another-us-precision-guided-weapon-falls-prey-russian-electronic-warfare-us-says/396141/" target="_blank" rel="noopener noreferrer">Defense One：另一種美國精準導引武器遭俄羅斯電子戰擊潰（2024）</a>：同上，原文的另一個來源。</li>
+<li><a href="https://alignment.anthropic.com/2026/modular-pretraining/" target="_blank" rel="noopener noreferrer">開放權重模型安全的模組化預訓練研究</a>：原文指向的開放權重模型安全研究。</li>
+<li><a href="https://www.anthropic.com/news/position-open-weights-models" target="_blank" rel="noopener noreferrer">Anthropic 對開放權重模型的立場</a>：原文引用 CEO 談開放權重模型的文章，也是原文談其好處時的連結。</li>
+<li><a href="https://www.anthropic.com/glasswing" target="_blank" rel="noopener noreferrer">Glasswing</a>：原文用來說明前沿模型智慧在資安上可以成為防守方的優勢。</li>
+</ul>
+
+</main>
+<footer>
+<p>本頁是非官方的導讀與翻譯整理，原文與原圖版權屬 Anthropic。繁體中文圖表為依原圖重製的翻譯版，數值以原圖為準；頂端插圖為 AI 生成，僅作示意。內容若與 <a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities" target="_blank" rel="noopener noreferrer">原文</a> 有出入，以原文為準。</p>
+</footer>
+<dialog id="lb" aria-label="放大檢視圖片"><div class="box"><img alt=""></div><button type="button" aria-label="關閉放大檢視">關閉</button></dialog>
+<script>
+(function(){
+  var dlg=document.getElementById('lb'); if(!dlg||!dlg.showModal) return;
+  var img=dlg.querySelector('img'), btn=dlg.querySelector('button'), last=null;
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a.zoom'); if(!a) return;
+    e.preventDefault(); last=a; var i=a.querySelector('img');
+    img.src=a.getAttribute('href'); img.alt=i?i.alt:''; dlg.showModal(); btn.focus();
+  });
+  function close(){dlg.close(); if(last) last.focus();}
+  btn.addEventListener('click',close);
+  dlg.addEventListener('click',function(e){if(e.target===dlg||e.target.classList.contains('box')) close();});
+})();
+</script>
+</body>
+</html>
