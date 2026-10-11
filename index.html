@@ -85,25 +85,26 @@ dialog#lb::backdrop{background:rgba(0,0,0,.82)}
 <h1>保護你的不是祕密，是請不起分析師：Anthropic 紅隊量到的情報定位與傳統武器能力</h1>
 <p class="byline">導讀　2026-10-11　｜　原文：<a href="https://www.anthropic.com/research/intelligence-targeting-conventional-weapons-capabilities" target="_blank" rel="noopener noreferrer">Anthropic Frontier Red Team，2026-09-10</a></p>
 <nav class="toc" aria-label="章節目錄"><details><summary>章節目錄</summary><ol><li><a href="#s1">為什麼是「定位」與「武器」，不是資安與生物</a></li><li><a href="#s2">作者的總結，與一個容易讀過去的前提</a></li><li><a href="#s3">定位評測之一：從假帳號堆裡認出同一個人</a></li><li><a href="#s4">定位評測之二：一張沒有座標的照片，能被猜到多近</a></li><li><a href="#s5">定位評測之三：從一週貼文找出一個人的家</a></li><li><a href="#s6">從「找人」換到「做武器」：評測的共同框架</a></li><li><a href="#s7">引導命中：結果是一道會變平的階梯</a></li><li><a href="#s8">投放與無 GPS 飛行：兩個「加了風與干擾就崩」的故事</a></li><li><a href="#s9">作者的結論，與本文的幾點判讀</a></li><li><a href="#s10">帶走的三件事</a></li><li><a href="#s11">來源</a></li></ol></details></nav>
+<p>先給一個三句話的版本。這篇文章在問：AI 現在能不能做過去只有少數專家才做得到的「找出一個人在哪裡」，以及「替無人機這類武器寫飛行控制程式」（後者只在模擬環境裡測）。Anthropic 的研究團隊設計了幾組測驗去量，結果是最強的幾個模型，找人已經做得很好，替無人機寫程式也能在簡單到中等的模擬情境裡做到。作者最在意的不是哪個模型贏，而是過去保護一般人的那道牆——請得起專家的人很少——正在變矮。</p>
 <blockquote class="summary"><p class="sum-title"><strong>摘要</strong></p>
 <ul>
-<li><strong>這是什麼</strong>：Anthropic 的 Frontier Red Team 在 2026 年 9 月 10 日發表的研究，用新設計的評測量兩件事：模型當「情報定位員」（身分關聯與分類、照片定位、文字定位）的能力，以及模型在模擬環境裡替無人機寫導引、導航與控制（GNC）軟體的能力。</li>
-<li><strong>主要發現</strong>：照片定位上，Mythos Preview 與 Mythos 5 的中位誤差是 37.0 km 與 47.2 km，優於 GeoGuessr 頂尖玩家的 151 km（但比較條件並不對等）；文字定位上，各模型的中位誤差擠在 20.1 到 31.3 km，作者解讀為核心能力已經普遍；軟體評測上，Opus 5、Mythos 5 與 Mythos Preview 對每一項模擬任務都寫得出可運作的 GNC 軟體。</li>
+<li><strong>這是什麼</strong>：Anthropic 的 Frontier Red Team（公司內設計評測、量測模型能力的團隊）在 2026 年 9 月 10 日發表的研究，用新設計的評測量兩件事：模型當「情報定位員」（身分關聯與分類、照片定位、文字定位）的能力，以及模型在模擬環境裡替無人機寫飛行控制軟體的能力。</li>
+<li><strong>主要發現</strong>：照片定位上，Mythos Preview 與 Mythos 5 的中位誤差（一半的照片猜得比這更近）是 37.0 km 與 47.2 km，優於 GeoGuessr 頂尖玩家的 151 km（但比較條件並不對等）；文字定位上，各模型的中位誤差擠在 20.1 到 31.3 km，作者解讀為核心能力已經普遍；軟體評測上，Opus 5、Mythos 5 與 Mythos Preview 對每一項模擬任務都寫得出可運作的飛控軟體。</li>
 <li><strong>作者的核心論點</strong>：讓多數人不被鎖定的，與其說是祕密，不如說是成本；模型把分析師工時變便宜，這層保護就在變薄。</li>
-<li><strong>作者承認的限制</strong>：評測多半依賴模擬資料，身分評測每個模型的樣本數是 18 / 16 / 16，照片定位的人類基準只是非對等的代理資料，武器評測只在模擬裡進行，也沒有直接量測 uplift。</li>
-<li><strong>本文的判讀</strong>：這三組「找人」評測的手法接近 OSINT（開源情報），用途卻是情報機關的鎖定（targeting）；而「最難的設定沒有任何模型解開」只能讀成「目前還沒」，不是安心的訊號。</li>
+<li><strong>作者承認的限制</strong>：評測多半依賴模擬資料，身分評測每個模型的樣本數是 18 / 16 / 16，照片定位的人類基準只是非對等的代理資料，武器評測只在模擬裡進行，也沒有直接量測 uplift（有了模型之後，人比原本多做到了什麼）。</li>
+<li><strong>本文的判讀</strong>：這三組「找人」評測的手法接近 OSINT（開源情報，也就是只靠公開資料做調查），用途卻是情報機關的鎖定（targeting）；而「最難的設定沒有任何模型解開」只能讀成「目前還沒」，不是安心的訊號。</li>
 </ul>
 </blockquote>
 <p>GeoGuessr 是一款猜街景拍攝地點的遊戲，最頂尖的玩家（排名前 0.01%）在對戰裡的中位誤差是 151 km。Anthropic 的 Frontier Red Team 拿一批社群網站上的普通照片去問模型，Mythos Preview 的中位誤差是 37.0 km，Mythos 5 是 47.2 km。兩邊的測試條件並不對等，後面會講；但就算打折，這個落差也夠讓人重新想一件事：過去要靠稀有專家花時間才能做的情報工作，現在有多少已經不再稀有。</p>
 <p>這篇文章是 Frontier Red Team 在 2026 年 9 月 10 日發表的〈Measuring tactical intelligence targeting and conventional weapons capabilities of AI models〉。他們做了兩組評測：一組量模型當「情報定位員」的能力，一組量模型替小型無人機寫飛控軟體的能力。以下依序談作者量了什麼、結果如何、哪些是作者自己承認的限制，以及本文自己的判讀。判讀的部分會明說，不會混進作者的結論裡。</p>
+<p>先認識一下受測的模型，後面會一直用到。Mythos Preview、Mythos 5、Opus 5、Sonnet 5 是 Anthropic 自家的 Claude 模型；Kimi K3 與 GLM 5.2 是文中受測的開放權重模型（模型檔案公開釋出、任何人都能下載；原文說這類模型來自中國開發者）。強弱沒有單一排序：作者說開放權重模型大致落在 Sonnet 與 Mythos 級之間；照片定位上 Mythos 兩款明顯優於 Opus 5，無人機軟體上卻是 Opus 5 最好。下文說「前沿模型」，指的是 Mythos 兩款與 Opus 5，這是本文為了方便讀者的用法。</p>
 <h2 id="s1">為什麼是「定位」與「武器」，不是資安與生物</h2>
-<p>資安與生物風險是 AI 濫用研究裡最常被檢視的兩塊。作者的出發點是：現代衝突大部分發生在比較傳統的領域，對手想辦法找出彼此來蒐集情報，戰鬥人員想讓傳統武器更準、更不怕反制。原文引用的 kill chain（find、fix、track、target、engage、assess）是描述這類交戰的概念模型，而每一步過去都要靠專家的人力與判斷。</p>
-<p>作者的問題很直接：AI 在資料分析與軟體開發上進步這麼快，能不能把這些本事用到國安的專門領域？同時發布的 Threat Intelligence 報告給了他們一個答案：裡面記錄了 AI 被用在監控與傳統武器開發的案例，顯示威脅行為者已經從中感受到好處。Frontier Red Team 的評測是它的補充，用來說明 AI 進展「如何」改變 kill chain 各段的風險。</p>
+<p>資安與生物風險是 AI 濫用研究裡最常被檢視的兩塊。作者的出發點是：現代衝突大部分發生在比較傳統的領域，對手想辦法找出彼此來蒐集情報，戰鬥人員想讓傳統武器更準、更不怕反制。原文引用的 kill chain 是軍方描述一次交戰從頭到尾的六個步驟：找到、釘住、追蹤、鎖定、交戰、評估（原文用 find、fix、track、target、engage、assess），而每一步過去都要靠專家的人力與判斷。</p>
+<p>作者的問題很直接：AI 在資料分析與軟體開發上進步這麼快，能不能把這些本事用到國安的專門領域？Anthropic 另一個團隊同時發布的 Threat Intelligence 報告給了他們一個答案：裡面記錄了 AI 被用在監控與傳統武器開發的案例，顯示威脅行為者已經從中感受到好處。Frontier Red Team 的評測是它的補充，用來說明 AI 進展「如何」改變 kill chain 各段的風險。</p>
 <p>這篇導讀不重述武器相關評測的任務設定與技術做法，只談評測量什麼、結果數字、作者自述的限制，以及對治理的意義。定位類也只談評測設計與結果。</p>
 <figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig1.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig1_m.webp" width="941" height="1672"><img src="images/zh/ig1.webp" alt="評估全景：左側三項定位評測、右側三項武器軟體評測，底部為受測模型" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理的評估全景（文字定位另含 GLM 5.2）。</figcaption></figure>
-<p><strong>本文判讀：這三組「找人」評測，手法上接近 OSINT（開源情報）。</strong> 照片定位只憑照片內容推斷拍攝地，近於影像的地理定位；帳號關聯與文字定位處理的是社群貼文裡的蛛絲馬跡（帳號關聯用的是模擬資料，文字定位用的是公開語料），近於社群媒體調查。原文自己沒有把這些評測稱為 OSINT，只在註腳提到 Bellingcat 這類開源情報調查者。兩個詞講的層次也不同：OSINT 說的是資料來源與方法，原文的 targeting（find、fix）說的是用途與流程，也就是替情報機關的鎖定工作服務。所以比較貼切的說法是：用接近 OSINT 的手法，做 targeting 的事。這是本文的歸納，不是作者的分類。</p>
 <h2 id="s2">作者的總結，與一個容易讀過去的前提</h2>
-<p>作者在摘要裡給的三個說法是：某些任務上，模型能做到過去只有稀少且訓練有素的專家才做得到的事；這些評測說明了為什麼平台端的安全措施有其必要，例如他們新實作、用來擋這類濫用的 classifier；來自中國的開放權重模型雖然落後前沿，仍展現令人擔憂的能力。他們的整體說法是，開放權重模型在同一批評測上落後前沿，表現通常介於 Sonnet 與 Mythos 級模型之間，但常常已經到了讓人擔心的程度，而且「Models well short of the frontier will have intelligence and military applications」。</p>
+<p>作者在摘要裡給的三個說法是：某些任務上，模型能做到過去只有稀少且訓練有素的專家才做得到的事；這些評測說明了為什麼平台端的安全措施有其必要，例如他們新實作、用來擋這類濫用的 classifier（自動辨識並擋下特定請求的過濾器）；來自中國的開放權重模型雖然落後前沿，仍展現令人擔憂的能力。他們的整體說法是，開放權重模型在同一批評測上落後前沿，表現通常介於 Sonnet 與 Mythos 級模型之間，但常常已經到了讓人擔心的程度，而且「離前沿還很遠的模型，也會有情報與軍事用途」（原文：Models well short of the frontier will have intelligence and military applications）。</p>
 <p>這裡有一個容易讀過去的前提，是整篇的核心邏輯，值得先停下來：</p>
 <blockquote>
 <p>「much of what protects people, programs, and facilities from intelligence targeting is not secrecy so much as cost.」</p>
@@ -111,21 +112,21 @@ dialog#lb::backdrop{background:rgba(0,0,0,.82)}
 <p>意思是，讓人不被鎖定的主要原因，不是資料藏得好。可用來去匿名化的資料，很多本來就公開在網路上、能便宜買到，或已經在敵對情報機構手上。真正擋住大多數人的是「分析師工時很貴」。如果模型把這份工時變得便宜、到處都有，兩件事會同時發生：過去做不到這套流程的個人與小團體變得做得到；資源充足的行動者也能把原本沒力氣處理的資料庫榨出價值。作者的結論是，兩種變化都可能讓更多人暴露在新的審視之下。註腳補了一句：這類專業知識隨著 Bellingcat 之類的線上開源情報調查者興起而略有擴散，但他們仍傾向聚焦在高知名度的目標與案件。</p>
 <p>這是本文最想請讀者帶走的概念：成本本來就是一種保護，而成本結構正在被改寫。這一點是作者自己明寫的，不是本文的延伸。</p>
 <h2 id="s3">定位評測之一：從假帳號堆裡認出同一個人</h2>
-<p>第一組評測做兩件事：判斷不同平台上的帳號是不是同一個人（身分關聯），以及把這些人分進感興趣的類別（身分分類）。作者的資料是模型生成的模擬社群內容，模擬 WhatsApp、Telegram、Instagram、Facebook 的使用者活動。整套產生 200 個任務，分布在兩個虛構情境（墨西哥市與加爾各答的抗議運動語料），依帳號數量與關聯證據稀疏程度分成三個難度：68 個簡單、68 個中等、64 個困難。指標是 F1。</p>
+<p>第一組評測做兩件事：判斷不同平台上的帳號是不是同一個人（身分關聯），以及把這些人分進感興趣的類別（身分分類）。作者的資料是模型生成的模擬社群內容，模擬 WhatsApp、Telegram、Instagram、Facebook 的使用者活動。整套產生 200 個任務，分布在兩個虛構情境（墨西哥市與加爾各答的抗議運動語料），依帳號數量與關聯證據稀疏程度分成三個難度：68 個簡單、68 個中等、64 個困難。指標是 F1（一種 0 到 1 的分數，同時看「抓到的對不對」與「有沒有漏抓」，1 為滿分）。</p>
 <p>先看作者自己標出的條件，這些條件決定了這組結果能怎麼讀：</p>
 <ul>
-<li>每個模型的樣本數是 18 / 16 / 16（簡單 / 中等 / 困難），合併為 50。就統計來說這個規模不大，這是本文的判讀。</li>
-<li>理論上限小於 1：有些帳號從不發文，再強的解題者也連不上。分類任務的上限同樣由設計決定，依難度只有約 76% / 60% / 52% 的成員會留下足以被找到的痕跡。</li>
-<li>資料是合成的，作者坦承仍有「redundant, artificial phrasing and a lack of naturalism」，因此結果只能看作模型之間能力差異的提示，不是現實環境的絕對成績。</li>
+<li>每個模型實際跑的樣本數是 18 / 16 / 16（簡單 / 中等 / 困難），合併為 50；這 50 個與前面 200 個任務之間的關係，原文沒有說明。就統計來說這個規模不大，這是本文的判讀。</li>
+<li>拿不到滿分：有些帳號從不發文，再強的解題者也連不上（理論上限小於 1）。分類任務的上限同樣由設計決定，依難度只有約 76% / 60% / 52% 的成員會留下足以被找到的痕跡。</li>
+<li>資料是合成的，作者坦承用語仍有重複、生硬、不夠自然的問題（原文：redundant, artificial phrasing and a lack of naturalism），因此結果只能看作模型之間能力差異的提示，不是現實環境的絕對成績。</li>
 <li>註腳說明他們試了兩種提示變體，一種點名特定人物，一種只描述關注的議題，報告的是後者，兩者的模型排序「essentially the same」。</li>
 </ul>
-<p>身分關聯上，Mythos Preview 最好，實際表現與理論上限的差距在三個難度都最小。Kimi K3 在簡單與中等樣本上和前沿差不多，一旦樣本雜訊更多、人物的作業安全做得更好，就落後了。分類任務的結果相近但分數更擠：Mythos Preview 最好、Sonnet 最差，K3 則和 Mythos 5、Opus 5 同在中段。</p>
+<p>身分關聯上，Mythos Preview 最好，實際表現與理論上限的差距在三個難度都最小。Kimi K3 在簡單與中等樣本上和前沿差不多，一旦樣本雜訊更多、虛構人物更會隱藏自己的身分，就落後了。分類任務的結果相近但分數更擠：Mythos Preview 最好、Sonnet 最差，K3 則和 Mythos 5、Opus 5 同在中段。</p>
 <p>比分數更有感的是速度。中位樣本約有 37,000 個英文單字，作者估計人類分析師光讀完就要約 2.5 小時，系統性分析更久；Claude Mythos Preview 平均約 11 分鐘就交出完整評估。</p>
 <h2 id="s4">定位評測之二：一張沒有座標的照片，能被猜到多近</h2>
-<p>第二組評測問的是「fix」，也就是把目標釘在某個地點。作者請模型只靠自己對世界的理解，替社群照片找出拍攝地，不能用以圖搜圖、不能讀 metadata、也不能用工具。照片來自 YFCC100M 的寬鬆授權、地理標記緊密的子集，濾掉無法定位的圖（向量圖、微距等），並依洲分層；標記作為標準答案，評測時對模型遮蔽。作者另用模型知識截止日期之後的保留影像做了額外實驗，結果分布相似。</p>
+<p>第二組評測問的是「fix」，也就是把目標釘在某個地點。作者請模型只靠自己對世界的理解，替社群照片找出拍攝地，不能用以圖搜圖、不能讀照片檔裡附帶的拍攝資訊（metadata）、也不能用工具。照片來自 YFCC100M 的寬鬆授權、地理標記緊密的子集，濾掉無法定位的圖（向量圖、微距等），並依洲分層；標記作為標準答案，評測時對模型遮蔽。作者另用模型知識截止日期之後的影像（模型訓練時不可能看過）做了額外實驗，結果分布相似。</p>
 <p>這一節最需要小心的是人類基準。作者坦白說，在這個資料集上沒有人類基準，只能用 Haas 等人 2024 年的 GeoGuessr 競技資料（458 場多回合對戰）當代理。該任務結構相似，但用的是街景，玩家還能在場景裡轉動、移動，每題掌握的資訊比模型看到的靜態單張更多；YFCC 的照片也不限於街道，場景雜得多。註腳還補了時間條件：對手答完之後，玩家只剩 15 秒，人類的中位數大約對應 15 到 20 秒的互動式街景探索，相較之下 Mythos 5 看單張靜態圖，中位用了 6 秒。簡單說，這是一個<strong>非對等</strong>的比較，而且原文只在這一項提供人類基準。</p>
 <figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig2.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig2_m.webp" width="941" height="1672"><img src="images/zh/ig2.webp" alt="照片定位的中位距離誤差：模型與 GeoGuessr 人類基準比較" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理，數字出自原文；橫軸為對數刻度，人類基準為非對等的代理資料。</figcaption></figure>
-<p>在這個但書之下，數字是這樣：6,000 張照片上，Mythos Preview 與 Mythos 5 的中位誤差是 37.0 km 與 47.2 km，都優於最強的人類基準（Champion 151 km），並且各有 23.7% 與 23.1% 的照片落在 1 km 內。Opus 5 是 181 km，18.0% 在 1 km 內，大致和 Master Division 的 174 km 相當。Sonnet 5 是 384 km、9.9%；Kimi K3 是最新受測的開放權重模型，385 km、16.7%，中位誤差和 Sonnet 5 一樣，但 1 km 內的比率約是 Sonnet 的 1.7 倍，也遠勝 Gold Division 的 1,714 km。作者據此判斷，前沿 LLM 的智慧正逼近「superhuman」的戶外照片定位能力。</p>
+<p>在這個但書之下，6,000 張照片的結果如上圖。Mythos Preview 與 Mythos 5 的中位誤差是 37.0 km 與 47.2 km，都優於最強的人類基準（Champion 的 151 km），而且各有將近四分之一（23.7%、23.1%）的照片落在 1 km 內。Opus 5 是 181 km，大致和 Master Division 的 174 km 相當。Sonnet 5 與 Kimi K3 都在 385 km 左右，比 Master Division 差，但遠勝 Gold Division 的 1,714 km。作者據此判斷，前沿模型的戶外照片定位能力正逼近「超越人類」（superhuman）。</p>
 <p>三則公開範例可以看出誤差長什麼樣。一例誤差約 750 m，一例約 50 m，另一例是把肯亞蒙巴薩的街景判成坦尚尼亞的尚吉巴，差了 239 km：這是區域建築風格相近導致的跨國誤判。原文把每一例的推理過程完整展示，本文不複述線索怎麼拼起來，只取「誤差距離與類型」：就這三例而言，近的可以精確到街區，遠的會落在風格相近的鄰近地區。</p>
 <div class="photo-row">
 <figure><a class="zoom" href="images/zh/ex1.jpg"><img src="images/zh/ex1.jpg" alt="範例 1 的照片：海灣、岸邊的仙人掌，遠處有白色公寓大樓" width="500" height="500" loading="lazy"></a><figcaption>範例 1　誤差約 750 m</figcaption></figure>
@@ -143,39 +144,39 @@ dialog#lb::backdrop{background:rgba(0,0,0,.82)}
 <p class="photo-credit">照片：<a href="https://www.flickr.com/photos/50811886@N00/2344106070/" target="_blank" rel="noopener noreferrer">Flickr 2344106070</a>（2008），CC BY／BY-SA，經 YFCC100M 資料集。</p>
 
 <h2 id="s5">定位評測之三：從一週貼文找出一個人的家</h2>
-<p>第三組把素材換成文字。作者用 GeoText，一份 2010 年的地理標記推文語料，涵蓋 9,475 位使用者；每位使用者都有一個預先標好、評測時對模型遮蔽的標準答案位置。語料中所有帳號名稱、提及與轉推都換成唯一代號。測試分割經過「有家」的篩選後剩 1,697 位使用者，模型要根據一週內的貼文推測家的位置，並且可以使用一個沙盒化的搜尋工具。</p>
-<p>這個設計有兩道防線，作者交代得很清楚。第一，因為語料自 2010 年就公開，他們另做了記憶化檢測：拿 185 位只給假名的使用者去問，沒有任何模型能定位；每個模型都落在「永遠猜紐約市」這條基準線以下或相當（中位誤差 800 到 2,000 km，而該子集的基準為 677 km）。第二，一個防作弊監控會在送出前擋掉含有假名或貼文逐字片段的查詢，查詢稽核紀錄也顯示沒有任何取回資料集的嘗試。作者因此認為，這項評測量的是從貼文內容推論的能力，不是單純靠回憶。</p>
+<p>第三組把素材換成文字。作者用 GeoText，一份 2010 年的地理標記推文語料，涵蓋 9,475 位使用者；每位使用者都有一個預先標好、評測時對模型遮蔽的標準答案位置。語料中所有帳號名稱、提及與轉推都換成唯一代號。測試集經過「有家」的篩選後剩 1,697 位使用者，模型要根據一週內的貼文推測家的位置，並且可以使用一個受限制的搜尋工具（能上網查，但送出的查詢會先被檢查）。</p>
+<p>這個設計有兩道防線，作者交代得很清楚。第一，因為語料自 2010 年就公開，他們另做了記憶化檢測（確認模型不是因為訓練時看過這份公開資料才答得出來）：拿 185 位只給假名的使用者去問，沒有任何模型能定位；每個模型都落在「永遠猜紐約市」這條基準線以下或相當（中位誤差 800 到 2,000 km，而該子集的基準為 677 km）。第二，一個防作弊監控會在送出前擋掉含有假名或貼文逐字片段的查詢，查詢稽核紀錄也顯示沒有任何取回資料集的嘗試。作者因此認為，這項評測量的是從貼文內容推論的能力，不是單純靠回憶。</p>
 <p>結果是：搜尋輔助下，中位家位置誤差 Mythos Preview 為 20.1 km，Mythos 5 為 20.9 km，Opus 5 為 21.7 km，Sonnet 5 為 31.3 km；Kimi K3 為 26.4 km，GLM 5.2 為 31.0 km，永遠猜紐約的基準是 727 km。有趣的是搜尋行為不同：Kimi K3 只對 57% 的使用者選擇搜尋，Claude 模型超過 99%，GLM 5.2 是 87%。</p>
 <figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig3.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig3_m.webp" width="941" height="1672"><img src="images/zh/ig3.webp" alt="文字定位的中位家位置誤差，與「保護從哪裡來」的天平概念圖" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理，數字出自原文；長條長度為示意，以標示的數值為準。</figcaption></figure>
 <p>作者對這個結果下了一個重要的判斷：各模型的分數擠得這麼近，表示做這件事所需的核心能力現在已經普遍存在，不是只有前沿模型才做得到。</p>
 <p>怎麼看這些數字，作者自己加了兩個但書。第一，他們為了保護隱私，在評測架構上放了限制，可能人為壓低了模型表現的天花板；作者推測，若開放不受限的網路搜尋、取消禁止去匿名化的限制、允許多輪累積檔案，準確度會更高，也可能拉開前沿與非前沿模型的差距。但作者也說，要不要、怎麼進一步驗證這個假設，他們想保持謹慎。第二，這組評測模擬的是在大型都會區辨識人、供後續監控與蒐集之用的場景，並未直接模擬在人口稀少的戰場上近即時地精準定位，那留給後續研究。</p>
-<p>這個「天花板」的說法，本文要和另一句話分開看。作者在武器評測那一節說結果更該讀成「floor rather than a ceiling」，兩句語意相容，都是在說量到的值低於實際能力，但在原文裡是兩個不同位置的論點。</p>
+<p>附帶一提，這裡說的「天花板」，和武器評測那一節的「floor rather than a ceiling」是兩個位置的論點，語意相容：量到的值都低於實際能力。</p>
 <p>還有兩件事值得記下來。一是 135 位使用者（語料的 8%）曾被至少一個模型穩定定位到其評估的家 1 km 內。其中 95 位（70%）因為直接提到宿舍、場館名稱或明確地點而洩漏；另 17 位（13%）是靠說話方式與地方性內容；其餘 23 位（17%）作者評估多半是運氣，模型只能收斂到都會區，丟出一個市中心座標，剛好離使用者住處很近。另一件是行為上的觀察：作者翻閱逐字稿時發現，模型常常主動嘗試去匿名化使用者。有一例真實貼文，Mythos 5 與 Mythos Preview 都找到了正確的都會區，但最後落在使用者評估住處 87 到 95 km 之外。原文用一個三回合的互動頁（提出假設與搜尋、追查線索、給出估計）呈現這個真實案例，內容已經去識別化，並說明貼文是改寫而非原文引述。</p>
-<p>另外作者還做了一個合成人物的示範（Ladder of Clues），設計上是把線索分成三個階段，從有具體場所名稱，到只有明確地點，再到完全沒有地點內容。每一階段都請 Mythos 5（不使用工具）重新回答家在哪、以及 50% 信心半徑，每階段取三個樣本、畫出中位數。作者特別註明這是一位虛構人物，是示意而不是比率。</p>
+<p>作者另用一個虛構人物做示範（Ladder of Clues）：線索從具體場所名稱，到只有明確地點，再到完全沒有地點內容，看 Mythos 5（不使用工具）在每個階段回答的家的位置與 50% 信心半徑（取三個樣本的中位數）。作者註明這是示意，不是比率。</p>
 <h2 id="s6">從「找人」換到「做武器」：評測的共同框架</h2>
-<p>武器子系統這邊，作者的立場是：大型語言模型當然還不能下場去磨機身，但它們會寫軟體。他們因此設計了一組評測，量模型在模擬環境中撰寫並改進導引、導航與控制（GNC）軟體的能力，涵蓋三件事：引導命中、投放、在被干擾與欺騙的環境中導航。作者認為，這類程式的專業同樣長期稀缺且昂貴；等模型拿掉這個瓶頸，會有更多團體能開發量身訂製的精準武器，不過材料與製造設備的取得，現階段仍是重要的制約。</p>
-<p>先把最大的限制擺在前面，這是作者自己放在這一節開頭的：這些評測<strong>只在模擬裡進行</strong>，「nothing substitutes for testing in hardware」。作者為什麼還是認為值得做，給了兩個理由。一是 Threat Intelligence 團隊已經發現真實的行為者成功把模型用在這類工作，所以他們不是靠模擬來證明威脅存在，而是用它來顯示模型能力的軌跡。二是這些評測能區分模型：較弱的模型失敗、較強的模型通過，而且最難的幾種設定，所有受測模型都還沒解開。</p>
-<p>共同的流程大致是：模型拿到一份書面任務說明與一個工作環境，撰寫程式、跑測試、拿到類似人類工程師會收集到的回饋，再修改後重飛。每次試驗有固定的飛行次數預算（每個 trial 12 次，投放評測為 15 次，每種設定 5 到 10 個隨機種子）；每次飛行都有隨機化，防止模型背答案，但各模型飛的是同一組隨機情境，便於比較。所有模型都用高推理設定執行。</p>
+<p>武器子系統這邊，作者的立場是：大型語言模型當然還不能下場去磨機身，但它們會寫軟體。他們因此設計了一組評測，量模型在模擬環境中撰寫並改進導引、導航與控制（GNC）軟體的能力，也就是讓無人機知道往哪飛、現在在哪、怎麼操縱的程式，涵蓋三件事：引導命中、投放、在 GPS 被干擾（收不到訊號）或欺騙（收到假訊號）的環境中導航。作者認為，這類程式的專業同樣長期稀缺且昂貴；等模型拿掉這個瓶頸，會有更多團體能開發量身訂製的精準武器，不過材料與製造設備的取得，現階段仍是重要的制約。</p>
+<p>先把最大的限制擺在前面，這是作者自己放在這一節開頭的：這些評測<strong>只在模擬裡進行</strong>，「沒有任何東西能取代實機測試」（原文：nothing substitutes for testing in hardware）。作者為什麼還是認為值得做，給了兩個理由。一是 Threat Intelligence 團隊已經發現真實的行為者成功把模型用在這類工作，所以他們不是靠模擬來證明威脅存在，而是用它來顯示模型能力的軌跡。二是這些評測能區分模型：較弱的模型失敗、較強的模型通過，而且最難的幾種設定，所有受測模型都還沒解開。</p>
+<p>共同的流程大致是：模型拿到一份書面任務說明與一個工作環境，撰寫程式、跑測試、拿到類似人類工程師會收集到的回饋，再修改後重飛。每次試驗有固定的飛行次數預算（每一輪試驗 12 次，投放評測為 15 次，每種設定 5 到 10 個隨機種子）；每次飛行都有隨機化，防止模型背答案，但各模型飛的是同一組隨機情境，便於比較。所有模型都用高推理設定執行。</p>
 <figure class="fig wide"><div class="fig-scroll"><a class="zoom" href="images/zh/fig1_zh.webp"><picture><img src="images/zh/fig1_zh.webp" alt="三項無人機飛控評測總覽：引導命中率與 5 m 內投放率（越高越好）、無 GPS 最終距離中位數（越低越好）；Opus 5 三項最佳，其次為 Mythos 系列，Sonnet 5 與 Kimi K3 落後" width="1925" height="817" loading="lazy"></picture></a></div><figcaption>圖 1：三項飛控軟體評測總覽。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/b6e052bfe65f0aed4561cc24de09aef0692d7ab7-2823x1198.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/b6e052bfe65f0aed4561cc24de09aef0692d7ab7-2823x1198.png" alt="英文原圖（Anthropic）：三項無人機飛控評測總覽" loading="lazy"></a></details></figure>
 <h2 id="s7">引導命中：結果是一道會變平的階梯</h2>
-<p>這一項模擬的是無人機在最後一段飛向一個可能移動的車輛目標。作者提到，在目前烏克蘭的 FPV 無人機上，終端導引是自動化的關鍵應用，所以他們選了這個切面來模擬。模型以擊中率計分，要早早寫出可行解、並在十二次隨機化發射裡穩定奏效，才拿得到分。</p>
-<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/8bc850d7362745512a889039dbfd834e51daf865.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 1：低多邊形的模擬場景，俯視鏡頭從遠處逼近道路上的一輛車，結尾畫面被車體填滿</a></p>
-<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/11716f7161dca7ac490e7e18ed8797772136e319.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 2：Opus 5 在最簡單的設定下成功，目標是停放的高對比車輛，畫面為無人機接近一輛紅白車並對準</a></p>
-<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/943a20a1e9d79ffc3db1433979fa421df55b8d89.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 3：Kimi K3 在同一個最簡單設定下的模擬機載畫面，左上標示模型名稱，最後沒有命中，作者的說明是差 1.86 m 後落地</a></p>
+<p>這一項模擬的是無人機在最後一段飛向一個可能移動的車輛目標。作者提到，在目前烏克蘭的 FPV 無人機（操作員看著機上鏡頭的第一人稱畫面遠端操控）上，終端導引是自動化的關鍵應用，所以他們選了這個切面來模擬。模型以擊中率計分，要早早寫出可行解、並在 12 次隨機化發射裡穩定奏效，才拿得到分。</p>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/8bc850d7362745512a889039dbfd834e51daf865.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 1：模擬畫面，俯視鏡頭逼近道路上的一輛車</a></p>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/11716f7161dca7ac490e7e18ed8797772136e319.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 2：Opus 5 在最簡單的設定下成功（停放的高對比車輛）</a></p>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/943a20a1e9d79ffc3db1433979fa421df55b8d89.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 3：Kimi K3 在同一個設定下的機載畫面，沒有命中（作者說明：差 1.86 m 後落地）</a></p>
 <figure class="fig wide"><div class="fig-scroll"><a class="zoom" href="images/zh/fig2_zh.webp"><picture><img src="images/zh/fig2_zh.webp" alt="各設定的無人機擊中率：Opus 5 在停放高可見度汽車上達 80%，最難設定全為 0%" width="2064" height="762" loading="lazy"></picture></a></div><figcaption>圖 2：各難度設定的擊中率。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/a34c78c700580f2d53f8726dbdd615f7890dfbe2-2951x1088.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/a34c78c700580f2d53f8726dbdd615f7890dfbe2-2951x1088.png" alt="英文原圖（Anthropic）：各設定的無人機擊中率" loading="lazy"></a></details></figure>
-<p>數字排出來，是一道越往下越平的階梯。面對停放且顏色對比明顯的車輛，Opus 5 的擊中率是 80%，Mythos Preview 70%，Mythos 5 53%，Kimi K3 15%，Sonnet 5 5%。車輛改以路速行駛後，Opus 降到 47%，Mythos Preview 20%，Mythos 5 17%，K3 1.6%，Sonnet 0%。多數模型的表現不受路邊雜物與速度變化影響，但 Opus 從 47% 降到 30%。低對比顏色是「everything breaks」的地方，在這個設定下只有 Opus 還有命中（8%）。偽裝、迴避或被誘餌包圍的設定，沒有任何受測模型能穩定解決。九種設定合計，Opus 5 在 540 次發射中擊中 20%，Mythos Preview 13%，Mythos 5 10%，Kimi K3 1.6%，Sonnet 5 0.7%。</p>
+<p>數字排出來，是一道越往下越平的階梯（各設定見圖 2）。最簡單的設定，是停著不動、顏色顯眼的車：Opus 5 的擊中率是 80%，Mythos Preview 70%，Mythos 5 53%，Kimi K3 15%，Sonnet 5 5%。車一開動，Opus 5 降到 47%，其他模型最多只剩 20%。顏色不顯眼的車，是作者說「所有東西都壞掉」（everything breaks）的地方，在這個設定下只有 Opus 5 還有命中，8%。偽裝、迴避或被誘餌包圍的設定，沒有任何受測模型能穩定解決。九種設定合計（共 540 次發射），Opus 5 擊中 20%，Sonnet 5 只有 0.7%，其他模型介於兩者之間（圖 1）。</p>
 <p>有一點反直覺：最新的 Mythos 系列沒有贏過 Opus 5。作者分析了原因，列出三個工程行為上的差異；這屬於工程做法層面，本文不展開。</p>
-<p>作者列出的限制有三。相機與渲染遠比現實簡單，這在某些方面讓評測更容易（感知程式不需像現實那麼穩健），但在另一些方面反而更難（模擬裡較容易做出偽裝與低對比）。真實的無人機可能有多鏡頭、更高解析度，甚至紅外線相機。作者還刻意只給初始目標標示、要求模型自己維持鎖定，而有些實戰系統用專用模組負責計算並維持追蹤。</p>
+<p>作者列出的限制有三。相機與渲染遠比現實簡單，這在某些方面讓評測變簡單（感知程式不需像現實那麼穩健），在另一些方面變難（模擬裡較容易做出偽裝與低對比）。真實的無人機可能有多鏡頭、更高解析度，甚至紅外線相機。作者還刻意只給初始目標標示、要求模型自己維持鎖定，而有些實戰系統用專用模組負責計算並維持追蹤。</p>
 <h2 id="s8">投放與無 GPS 飛行：兩個「加了風與干擾就崩」的故事</h2>
-<p><strong>投放</strong>評測量模型寫程式、對目標釋放模擬的投放物。作者用兩個指標：中位落點誤差落在 5 m 內的飛行比例，以及中位誤差本身。靜態靶基本上已經飽和：Opus 5 與 Mythos 5 幾乎全中，中位誤差二十到三十公分；Sonnet 5 與 Mythos Preview 都是 92% 的飛行落在 5 m 內，中位誤差分別為 0.5 m 與 0.2 m；Kimi K3 是 83%，中位 0.4 m。目標開始移動後，模型才拉開差距：約三公尺每秒的移動目標上，Sonnet 5 多數失敗，K3 有 53%，中位約 1.8 m；Opus 5 是 76%，約一公尺；Mythos Preview 77%、Mythos 5 69%，中位約一點五公尺與兩公尺。偽裝車在障礙物間曲折時，Mythos Preview 為 53%，Opus 44%，Mythos 5 30%，Sonnet 與 K3 幾乎為零。</p>
-<p>最難的設定下幾乎所有模型崩潰：K3 和 Sonnet 5 幾乎沒有成功的投放，Mythos 5 與 Mythos Preview 分別只有 7% 與 4%。只有 Opus 5 還有成績，28% 的飛行成功，在它釋放的投放物上中位誤差 3.9 m，剛好卡在 5 m 內。</p>
+<p><strong>投放</strong>評測量模型寫程式、對目標釋放模擬的投放物。作者用兩個指標：落點在 5 m 內的飛行比例，以及落點誤差的中位數（各設定見圖 3）。目標靜止、無風時，大家都做得到：除了 Kimi K3 的 83%，其餘模型都有九成以上落在 5 m 內，中位誤差不到 1 m。目標開始移動，差距才拉開：在約每秒 3 m 的移動目標上，Opus 5 與 Mythos Preview 約七到八成（76%、77%），Mythos 5 是 69%，Kimi K3 是 53%，Sonnet 5 多數失敗。偽裝車在障礙物間曲折時，只有前沿的三個模型還有三到五成，Sonnet 5 與 Kimi K3 幾乎為零。</p>
+<p>最難的設定（目標蛇行加上陣風）下，幾乎所有模型崩潰：Kimi K3 與 Sonnet 5 都只有 3%，Mythos 5 是 7%，Mythos Preview 是 4%。只有 Opus 5 還有 28% 的飛行成功，中位誤差 3.9 m，剛好卡在 5 m 內。</p>
 <figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/fig3_zh.webp"><picture><img src="images/zh/fig3_zh.webp" alt="投放評測各設定結果：上圖為 5 m 內落點比例（越高越好），下圖為失誤距離中位數（對數刻度，越低越好）；多數模型對靜止目標可落在 5 m 內，最難的有風蛇行目標只有 Opus 5 還有 28%，其餘不到 8%" width="1421" height="1107" loading="lazy"></picture></a></div><figcaption>圖 3：投放評測。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/f0250a95621ed26b19c68b170ae30b8df7208f07-2405x1875.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/f0250a95621ed26b19c68b170ae30b8df7208f07-2405x1875.png" alt="英文原圖（Anthropic）：投放評測各設定結果" loading="lazy"></a></details></figure>
-<p><strong>無 GPS 飛行</strong>則模擬導航被電子干擾與欺騙的情境。作者的背景說明是，俄烏衝突中 GPS 經常被干擾與欺騙，GPS 導引的彈藥與依賴衛星導航的無人機因此無法仰賴準確訊號。模型先有十二次開發飛行，再用五次未見過的保留飛行來評測；指標是宣告抵達點與目的地的中位距離，以及五次中有幾次落在 5 m 內。難度分五級，從乾淨 GPS 到長航程的強力欺騙；欺騙的時機與方式不會告訴模型。</p>
-<p>乾淨 GPS 的設定下，除了 Sonnet 5 之外所有模型都能飛完全程，通常停在距目的地一兩公尺內；Sonnet 5 在有風時就算 GPS 正常也無法穩定完成。Kimi K3 在沒有欺騙或干擾時飛得很稱職，但一旦受到攻擊就容易被騙，四個受攻擊設定的終點都離目的地超過一百公尺；它在最簡單以外的設定，表現和 Sonnet 5 差不多。當 GPS 在最後進場階段被拒止時，Opus 5 通常停在十五到二十公尺外，約三分之一的飛行落在 5 m 內；Mythos 5 與 Mythos Preview 稍低於三十公尺；Sonnet 5 與 Kimi K3 則停在一百公尺以上。遇到細微的欺騙（緩慢漂移）時，所有模型都表現很差，最難設定沒有任何模型成功。</p>
-<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/fig4_zh.webp"><picture><img src="images/zh/fig4_zh.webp" alt="無 GPS 飛行結果：上圖為最終距離中位數（對數刻度，越低越好），下圖為 5 m 內抵達比例（越高越好）；GPS 乾淨時多數模型抵達，被拒止或欺騙後只有 Opus 5 在進場拒止設定下有 30%，其餘幾乎為 0" width="1423" height="1105" loading="lazy"></picture></a></div><figcaption>圖 4：無 GPS 飛行評測。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/c6122be642a10bb9c30f992dc6290dca1e94a015-2416x1877.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/c6122be642a10bb9c30f992dc6290dca1e94a015-2416x1877.png" alt="英文原圖（Anthropic）：無 GPS 飛行結果" loading="lazy"></a></details></figure>
-<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/096212d70b306f6444768a4a8e89a45b246b706a.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 4：「Flying without GPS: persistent drift on the final approach」軌跡動畫（6 倍速），在同一條航線、風與 GPS 攻擊下重飛 Kimi K3、Mythos 5、Opus 5，依序經過 GPS 正常、被拒止、被欺騙；結尾畫面顯示 Kimi K3 出界（誤差 229 m）、Mythos 5 終點誤差 19.4 m，並標出終點 5 m 範圍圈</a></p>
+<p><strong>無 GPS 飛行</strong>則模擬導航被電子干擾（收不到訊號）與欺騙（收到假訊號）的情境。作者的背景說明是，俄烏衝突中 GPS 經常被干擾與欺騙，GPS 導引的彈藥與依賴衛星導航的無人機因此無法仰賴準確訊號。模型先有 12 次開發飛行，再用 5 次沒給它看過的保留飛行來評測；指標是宣告抵達點與目的地的中位距離，以及五次中有幾次落在 5 m 內。難度分五級，從乾淨 GPS 到長航程的強力欺騙；欺騙的時機與方式不會告訴模型。</p>
+<p>GPS 正常（只有風）的設定下，除了 Sonnet 5 之外所有模型都能飛完全程，通常停在距目的地 1 到 2 m 內；Sonnet 5 連有風時都無法穩定完成。Kimi K3 在 GPS 沒被動手腳時飛得很稱職，一旦訊號被干擾或欺騙，四個受攻擊設定的終點都離目的地超過 100 m。GPS 在最後進場被切斷（圖中稱「拒止」）時，Opus 5 通常停在 15 到 20 m 外，約三分之一的飛行落在 5 m 內；Mythos 5 與 Mythos Preview 稍低於 30 m；Sonnet 5 與 Kimi K3 停在 100 m 以上。遇到緩慢漂移的細微欺騙，所有模型都表現很差，最難的設定沒有任何模型成功。</p>
+<figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/fig4_zh.webp"><picture><img src="images/zh/fig4_zh.webp" alt="無 GPS 飛行結果：上圖為最終距離中位數（對數刻度，越低越好），下圖為 5 m 內抵達比例（越高越好）；GPS 乾淨時多數模型抵達，被切斷或欺騙後只有 Opus 5 在進場被切斷的設定下有 30%，其餘幾乎為 0" width="1423" height="1105" loading="lazy"></picture></a></div><figcaption>圖 4：無 GPS 飛行評測。繁體中文翻譯版，數值以原圖為準。</figcaption><details class="orig"><summary>展開看英文原圖</summary><a href="https://www-cdn.anthropic.com/images/4zrzovbb/website/c6122be642a10bb9c30f992dc6290dca1e94a015-2416x1877.png" target="_blank" rel="noopener noreferrer"><img src="https://www-cdn.anthropic.com/images/4zrzovbb/website/c6122be642a10bb9c30f992dc6290dca1e94a015-2416x1877.png" alt="英文原圖（Anthropic）：無 GPS 飛行結果" loading="lazy"></a></details></figure>
+<p class="video-link"><a href="https://cdn.sanity.io/files/4zrzovbb/website/096212d70b306f6444768a4a8e89a45b246b706a.mp4" target="_blank" rel="noopener noreferrer">▶ 影片 4：同一條航線下，Kimi K3、Mythos 5、Opus 5 在 GPS 被干擾時的軌跡動畫（6 倍速）；結尾 Kimi K3 出界（誤差 229 m），Mythos 5 終點誤差 19.4 m</a></p>
 <p>三項評測合起來，作者的總結是：Opus 5、Mythos 5 與 Mythos Preview 對每一項模擬任務都寫得出可運作的 GNC 軟體，並在簡單到中等的設定下把它迭代到可靠；Sonnet 5 只能完成每項任務最簡單的版本；開放權重的 Kimi K3 在投放上高於 Sonnet，在導引命中與干擾下的導航則回到 Sonnet 的水準。</p>
-<p>作者也強調了怎麼解讀這些結果。模型是單獨在沙盒裡工作，只有書面任務說明、物理模擬器與固定的飛行預算；沒有網路、沒有可直接整合的完整解法庫、也沒有人類仔細讀遙測資料。這遠少於一個有動機的人實際會有的資源，弱模型卡住的原因，很多是人類夥伴多做點網路研究與實測就能補救的錯誤。作者因此認為這些結果比較像「地板」而不是「天花板」；他們也說開放權重生態系離得夠近，這個差距不該被誤認為安全，「that gap will eventually close」。</p>
+<p>作者也強調了怎麼解讀這些結果。模型是單獨在沙盒裡工作，只有書面任務說明、物理模擬器與固定的飛行預算；沒有網路、沒有可直接整合的完整解法庫、也沒有人類仔細讀遙測資料。這遠少於一個有動機的人實際會有的資源，弱模型卡住的原因，很多是人類夥伴多做點網路研究與實測就能補救的錯誤。作者因此認為這些結果比較像「地板」而不是「天花板」；他們也說開放權重生態系離得夠近，這個差距不該被誤認為安全，「這個差距終究會被追上」（原文：that gap will eventually close）。</p>
 <figure class="fig"><div class="fig-scroll"><a class="zoom" href="images/zh/ig4.webp"><picture><source media="(max-width: 640px)" srcset="images/zh/ig4_m.webp" width="941" height="1672"><img src="images/zh/ig4.webp" alt="作者自述的限制：定位類與武器軟體類各五項" width="1672" height="941" loading="lazy"></picture></a></div><figcaption>圖：本文整理自原文各節的限制說明。</figcaption></figure>
 <h2 id="s9">作者的結論，與本文的幾點判讀</h2>
 <p>結論段作者先收斂了限制：許多評測依賴模擬資料，也沒有直接量測 uplift（模型讓人多做到了什麼）。這些結果指向的是低資源團體取得新的專業能力，以及國家級行為者的能力被放大，這些行為者原本受限於能雇用的分析師或工程師人數；而許多情況下，這些行為者仍會被材料限制卡住，AI 是否、如何幫忙跨過這些限制，是後續研究的要務。即便如此，作者說證據是清楚的：現有的閉源與開放權重模型，都能協助威脅行為者辨識與定位人，並設計武器子系統的軟體。</p>
@@ -186,6 +187,7 @@ dialog#lb::backdrop{background:rgba(0,0,0,.82)}
 <p><strong>第三，模型之間的差距在不同任務上並不同步。</strong> 文字定位的中位誤差擠在 20.1 到 31.3 km，作者的解讀是核心能力已普遍；軟體評測的差距卻很大（擊中率從 20% 到 0.7%）。所以「開放權重落後前沿多少」沒有單一答案，要看是哪種任務。這是本文的歸納，不是原文的論點。</p>
 <p><strong>第四，模擬永遠是下限的證據，不是上限的證據。</strong> 作者自己的邏輯是，威脅已由 Threat Intelligence 的真實案例證明，模擬只用來量測軌跡。照這個邏輯，最難設定「全部模型都沒解開」不能被讀成安心的訊號，只能讀成「目前還沒」。</p>
 <p><strong>第五，值得追問的缺口。</strong> 原文沒有量 uplift，也沒有量人類加模型的組合；材料與製造這類現實制約如何被 AI 改變，作者列為未來工作。這些是現在無法回答的問題，不是已有的結論。</p>
+<p><strong>第六，這三組「找人」評測，手法上接近 OSINT（開源情報）。</strong> 照片定位只憑照片內容推斷拍攝地，近於影像的地理定位；帳號關聯與文字定位處理的是社群貼文裡的蛛絲馬跡（帳號關聯用的是模擬資料，文字定位用的是公開語料），近於社群媒體調查。原文自己沒有把這些評測稱為 OSINT，只在註腳提到 Bellingcat 這類開源情報調查者。兩個詞講的層次也不同：OSINT 說的是資料來源與方法，原文的 targeting（find、fix）說的是用途與流程，也就是替情報機關的鎖定工作服務。所以比較貼切的說法是：用接近 OSINT 的手法，做 targeting 的事。這是本文的歸納，不是作者的分類。</p>
 <p>如果成本真的是大多數人的保護傘，那傘下的人需要先知道傘在變薄。這篇研究做的就是這件事，至於怎麼補，作者自己也說，答案還沒有。</p>
 <h2 id="s10">帶走的三件事</h2>
 <p><strong>一、成本曾是多數人的保護，現在正在被改寫。</strong> 這是作者的論點：模型把分析師工時變便宜，過去做不到這套流程的個人與小團體變得做得到，資源充足的行動者也能處理更多資料。本文的判讀是，對個人來說最實際的做法，是少在公開貼文裡留具體地點詞：文字定位那組評測裡，被穩定定位到 1 km 內的 135 位使用者，有 95 位（70%）是因為直接提到明確地點。</p>
